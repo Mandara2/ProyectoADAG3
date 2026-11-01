@@ -1,0 +1,30 @@
+[
+  {
+    "archivo": "ejemplo_almuerzo.json",
+    "estado": "ok",
+    "id": "ejemplo_almuerzo",
+    "n": 3,
+    "B": 5,
+    "etapas_aceleradas": [
+      2,
+      3
+    ],
+    "costo_usado": 5,
+    "duracion_final": 6,
+    "tiempo_ms": 0.0064799998654052615
+  },
+  {
+    "archivo": "ejemplo_tres_etapas.json",
+    "estado": "ok",
+    "id": "ejemplo_tres_etapas",
+    "n": 3,
+    "B": 10,
+    "etapas_aceleradas": [
+      1,
+      3
+    ],
+    "costo_usado": 9,
+    "duracion_final": 15,
+    "tiempo_ms": 0.005500001134350896
+  }
+]

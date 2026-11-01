@@ -1,0 +1,97 @@
+{
+  "id": "ejemplo_tres_etapas",
+  "n": 3,
+  "tiempo_ms": 0.005500001134350896,
+  "etapas_aceleradas": [
+    1,
+    3
+  ],
+  "costo_usado": 9,
+  "presupuesto": 10,
+  "reduccion": 7,
+  "duracion_original": 22,
+  "duracion_final": 15,
+  "traza": {
+    "casillas_tabla": 44,
+    "reconstruccion": [
+      {
+        "etapa": 3,
+        "b": 10,
+        "DP[i][b]": 7,
+        "DP[i-1][b]": 5,
+        "decision": "acelerar",
+        "presupuesto_restante": 5
+      },
+      {
+        "etapa": 2,
+        "b": 5,
+        "DP[i][b]": 3,
+        "DP[i-1][b]": 3,
+        "decision": "no acelerar",
+        "presupuesto_restante": 5
+      },
+      {
+        "etapa": 1,
+        "b": 5,
+        "DP[i][b]": 3,
+        "DP[i-1][b]": 0,
+        "decision": "acelerar",
+        "presupuesto_restante": 1
+      }
+    ],
+    "tabla": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      [
+        0,
+        0,
+        0,
+        2,
+        3,
+        3,
+        3,
+        5,
+        5,
+        5,
+        5
+      ],
+      [
+        0,
+        0,
+        0,
+        2,
+        3,
+        4,
+        4,
+        5,
+        6,
+        7,
+        7
+      ]
+    ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "id": "ejemplo_almuerzo",
+  "n": 3,
+  "tiempo_ms": 0.0064799998654052615,
+  "etapas_aceleradas": [
+    2,
+    3
+  ],
+  "costo_usado": 5,
+  "presupuesto": 5,
+  "reduccion": 22,
+  "duracion_original": 28,
+  "duracion_final": 6,
+  "traza": {
+    "casillas_tabla": 24,
+    "reconstruccion": [
+      {
+        "etapa": 3,
+        "b": 5,
+        "DP[i][b]": 22,
+        "DP[i-1][b]": 16,
+        "decision": "acelerar",
+        "presupuesto_restante": 2
+      },
+      {
+        "etapa": 2,
+        "b": 2,
+        "DP[i][b]": 10,
+        "DP[i-1][b]": 6,
+        "decision": "acelerar",
+        "presupuesto_restante": 0
+      },
+      {
+        "etapa": 1,
+        "b": 0,
+        "DP[i][b]": 0,
+        "DP[i-1][b]": 0,
+        "decision": "no acelerar",
+        "presupuesto_restante": 0
+      }
+    ],
+    "tabla": [
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        6,
+        6,
+        6,
+        6,
+        6
+      ],
+      [
+        0,
+        6,
+        10,
+        16,
+        16,
+        16
+      ],
+      [
+        0,
+        6,
+        10,
+        16,
+        18,
+        22
+      ]
+    ]
+  }
+}
