@@ -1,0 +1,383 @@
+% Informe de la primera entrega — gemelo en LaTeX del documento de trabajo.
+% Compilar con pdflatex (por ejemplo, en Overleaf).
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands,es-tabla]{babel}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\MochilaDec}{\textsc{Mochila-Dec}}
+\newcommand{\AcelDec}{\textsc{Acel-Dec}}
+\newcommand{\redp}{\le_{p}}
+
+\title{Aceleración de una cadena de etapas bajo presupuesto\\[4pt]
+  \large Informe de la primera entrega --- Subproyecto 3, Grupo 3}
+\author{Rafael Medina \and Isabela Guerrero\\[4pt]
+  \small Análisis y Diseño de Algoritmos, 2026-B --- Universidad de Caldas}
+\date{6 de noviembre de 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Este informe estudia cómo repartir un presupuesto para acelerar las etapas de una cadena de procesamiento, de modo que la cadena termine lo antes posible. Se muestra que el problema es una forma disfrazada de la mochila 0/1 y, por eso, NP-difícil. Aun así, se resuelve de forma exacta con programación dinámica en $O(n \cdot B)$, un costo pseudo-polinomial. La solución se implementó y se validó con casos propios cuya respuesta se calculó por fuerza bruta.
+
+El alcance es el primer problema del Subproyecto~3; la cobertura mínima de auditoría queda fuera, por indicación del curso. El código está en \url{https://github.com/Mandara2/ProyectoADAG3}.
+\end{abstract}
+
+% ---------------------------------------------------------------------------
+\section{Introducción}
+
+Un sistema de asistentes de inteligencia artificial procesa cada solicitud a través de una cadena de etapas en serie: una etapa empieza solo cuando termina la anterior. Cada etapa tiene una duración normal, pero se puede acelerar pagando un costo, y así se reduce su duración. El presupuesto para acelerar es limitado. La pregunta es qué etapas acelerar para que la cadena termine lo antes posible sin gastar más de lo disponible.
+
+A lo largo del informe usaremos un mismo ejemplo pequeño, para ver cada idea aplicada a números concretos. Es una cadena de tres etapas con presupuesto $B = 10$ (Tabla~\ref{tab:ejemplo}).
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{cccc}
+    \toprule
+    Etapa & Duración normal $t$ & Costo de acelerar $c$ & Reducción $d$ \\
+    \midrule
+    1 & 8 & 4 & 3 \\
+    2 & 5 & 3 & 2 \\
+    3 & 9 & 5 & 4 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Ejemplo que acompaña todo el informe ($B = 10$).}
+  \label{tab:ejemplo}
+\end{table}
+
+Sin acelerar nada, la cadena dura $8 + 5 + 9 = 22$. Acelerar las tres costaría 12, más que el presupuesto, así que hay que elegir. Con tres etapas basta probar a mano todas las opciones; con cientos de etapas ya no. Para razonar sobre el problema en general, primero lo escribimos con precisión.
+
+% ---------------------------------------------------------------------------
+\section{Formalización del problema}
+\label{sec:formalizacion}
+
+El problema se define por sus datos, la forma de una solución, la condición que debe cumplir y lo que se quiere optimizar.
+
+\paragraph{Entrada.} Un entero $n \ge 0$ de etapas y un presupuesto entero $B \ge 0$. Para cada etapa $i$, tres enteros: la duración normal $t_i$, el costo de aceleración $c_i$ y la reducción $d_i$, con $0 \le d_i \le t_i$ (ninguna etapa puede quedar con duración negativa).
+
+\paragraph{Salida.} Un conjunto $A \subseteq \{1, \dots, n\}$ con las etapas que se aceleran.
+
+\paragraph{Restricción.} Lo que se paga no puede superar el presupuesto:
+\[
+  \sum_{i \in A} c_i \le B .
+\]
+
+\paragraph{Objetivo.} Como las etapas están en serie, todas forman parte del camino crítico y la duración total es la suma de todas. Se quiere minimizar
+\[
+  D(A) = \sum_{i=1}^{n} t_i - \sum_{i \in A} d_i .
+\]
+La primera suma no depende de $A$. Por eso, minimizar la duración equivale a maximizar la reducción total:
+\begin{equation}
+  \label{eq:objetivo}
+  \max_{A \subseteq \{1,\dots,n\}} \; \sum_{i \in A} d_i
+  \quad \text{sujeto a} \quad \sum_{i \in A} c_i \le B .
+\end{equation}
+
+\paragraph{Tamaño de la entrada.} Lo medimos con $n$ y $B$. $n$ es el número de decisiones (acelerar o no cada etapa) y $B$ fija cuántos niveles de gasto hay que considerar. La longitud real de la entrada, en bits, es
+\[
+  L = O\Big(\sum_{i=1}^{n} \big(\log t_i + \log c_i + \log d_i\big) + \log B\Big).
+\]
+La diferencia entre medir con $B$ y medir con $\log B$ será clave en la Sección~\ref{sec:dp}.
+
+\paragraph{El ejemplo, formalizado.} Hay $2^3 = 8$ conjuntos posibles (Tabla~\ref{tab:subconjuntos}).
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{lcccc}
+    \toprule
+    $A$ & Costo & Reducción & Duración & ¿Cabe en $B = 10$? \\
+    \midrule
+    $\emptyset$ & 0 & 0 & 22 & sí \\
+    $\{1\}$ & 4 & 3 & 19 & sí \\
+    $\{2\}$ & 3 & 2 & 20 & sí \\
+    $\{3\}$ & 5 & 4 & 18 & sí \\
+    $\{1, 2\}$ & 7 & 5 & 17 & sí \\
+    $\mathbf{\{1, 3\}}$ & \textbf{9} & \textbf{7} & \textbf{15} & \textbf{sí (óptimo)} \\
+    $\{2, 3\}$ & 8 & 6 & 16 & sí \\
+    $\{1, 2, 3\}$ & 12 & 9 & 13 & no \\
+    \bottomrule
+  \end{tabular}
+  \caption{Todos los conjuntos de etapas del ejemplo.}
+  \label{tab:subconjuntos}
+\end{table}
+
+La mejor opción es acelerar las etapas 1 y 3: cuesta 9 y deja la cadena en 15. Probar todo funciona aquí, pero en general hay $2^n$ conjuntos, y con $n = 60$ ya son más de $10^{18}$.
+
+La forma del objetivo, elegir elementos con un costo y un beneficio bajo un límite, es la de un problema clásico: la mochila.
+
+% ---------------------------------------------------------------------------
+\section{El problema de la mochila 0/1}
+\label{sec:mochila}
+
+En la mochila 0/1 hay una mochila con capacidad limitada y un conjunto de objetos, cada uno con un peso y un valor. Hay que escoger qué objetos llevar para que el valor total sea el mayor posible sin pasar la capacidad. ``0/1'' significa que cada objeto se lleva entero o no se lleva: no se puede llevar una fracción.
+
+\paragraph{Definición (optimización).} Dados $n$ objetos con pesos $w_i$ y valores $v_i$, enteros no negativos, y una capacidad entera $W$, encontrar $S \subseteq \{1, \dots, n\}$ que resuelva
+\[
+  \max_{S} \; \sum_{i \in S} v_i \quad \text{sujeto a} \quad \sum_{i \in S} w_i \le W .
+\]
+
+\paragraph{Definición (decisión), \MochilaDec.} Dado además un umbral $V$, ¿existe $S$ con peso a lo sumo $W$ y valor al menos $V$?
+\[
+  \exists\, S \subseteq \{1,\dots,n\} : \; \sum_{i \in S} w_i \le W \;\wedge\; \sum_{i \in S} v_i \ge V .
+\]
+
+Dos hechos conocidos de este problema se usan más adelante. \MochilaDec{} es NP-completo \cite{karp}. Y la versión de optimización tiene un algoritmo exacto de programación dinámica que cuesta $O(n \cdot W)$.
+
+\paragraph{La correspondencia con nuestro problema.} Si comparamos la formulación~\eqref{eq:objetivo} con la de la mochila, son la misma con otros nombres (Tabla~\ref{tab:correspondencia}).
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    Aceleración de la cadena & Mochila 0/1 \\
+    \midrule
+    Etapa $i$ & Objeto $i$ \\
+    Costo de acelerar $c_i$ & Peso $w_i$ \\
+    Reducción $d_i$ & Valor $v_i$ \\
+    Presupuesto $B$ & Capacidad $W$ \\
+    Etapas aceleradas $A$ & Objetos elegidos $S$ \\
+    Maximizar $\sum d_i$ & Maximizar $\sum v_i$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Correspondencia entre los dos problemas.}
+  \label{tab:correspondencia}
+\end{table}
+
+Nuestro ejemplo es, entonces, una mochila con pesos $(4, 3, 5)$, valores $(3, 2, 4)$ y capacidad 10, cuya mejor respuesta es llevar los objetos 1 y 3, con valor 7.
+
+Esta correspondencia se usará en dos sentidos. En la Sección~\ref{sec:dp} la aprovechamos para resolver el problema con la programación dinámica de la mochila. Antes, en la Sección~\ref{sec:reduccion}, la usamos al revés para demostrar que el problema es difícil. Para eso primero hay que precisar qué significa ``difícil''.
+
+% ---------------------------------------------------------------------------
+\section{Qué significa que un problema sea difícil}
+\label{sec:teoria}
+
+En teoría de la complejidad, ``difícil'' tiene un sentido preciso: no se conoce, y se cree que no existe, un algoritmo que lo resuelva en tiempo polinomial. Esta sección construye esa idea paso a paso.
+
+\paragraph{Problemas de decisión.} Las clases de complejidad se definen sobre problemas cuya respuesta es sí o no. Un problema de optimización se asocia con una versión de decisión que agrega un umbral, como hicimos con \MochilaDec. No se pierde información: si se sabe responder la pregunta para cualquier umbral, se puede encontrar el óptimo.
+
+\paragraph{Tiempo polinomial.} Un algoritmo corre en tiempo polinomial si su número de pasos es $O(L^k)$ para alguna constante $k$, donde $L$ es la longitud en bits de la entrada.
+
+\paragraph{Las clases P y NP.}
+\begin{itemize}
+  \item \textbf{P} son los problemas de decisión que se resuelven en tiempo polinomial.
+  \item \textbf{NP} son los problemas de decisión en los que, cuando la respuesta es sí, existe un certificado de tamaño polinomial que se verifica en tiempo polinomial. Para \MochilaDec, el certificado es el conjunto $S$: basta sumar pesos y valores, en $O(n)$, para comprobarlo. Todo problema de P está en NP.
+\end{itemize}
+
+\paragraph{Reducción polinomial.} Un problema $A$ se reduce a un problema $B$, y se escribe $A \redp B$, si existe una función $f$ computable en tiempo polinomial que transforma cada caso $x$ de $A$ en un caso $f(x)$ de $B$ con la misma respuesta:
+\[
+  x \text{ es un caso sí de } A \iff f(x) \text{ es un caso sí de } B .
+\]
+Si $B$ tuviera un algoritmo polinomial, $A$ también: bastaría con transformar $x$ y resolver $f(x)$. Por eso $B$ es al menos tan difícil como $A$. Además, las reducciones se encadenan: si $A \redp B$ y $B \redp C$, entonces $A \redp C$.
+
+\paragraph{NP-difícil y NP-completo.}
+\begin{itemize}
+  \item Un problema $X$ es \textbf{NP-difícil} si todo problema de NP se reduce a $X$. $X$ no tiene que estar en NP.
+  \item $X$ es \textbf{NP-completo} si es NP-difícil y además está en NP.
+\end{itemize}
+
+\paragraph{Cómo se prueba en la práctica.} Cook \cite{cook} probó que SAT es NP-completo, y Karp \cite{karp} extendió el resultado a otros problemas, entre ellos la mochila, mediante cadenas de reducciones. Gracias a la transitividad, para probar que un problema nuevo es NP-difícil basta con reducir a él un problema que ya se sabe NP-difícil.
+
+\paragraph{Por qué importa.} No se sabe si $\mathrm{P} = \mathrm{NP}$, pero se conjetura que no. Si $\mathrm{P} \ne \mathrm{NP}$, ningún problema NP-difícil tiene un algoritmo polinomial. Demostrar que un problema es NP-difícil justifica, entonces, no buscar un algoritmo polinomial y aceptar otro tipo de solución.
+
+\paragraph{Dificultad en sentido débil.} Algunos problemas NP-difíciles tienen algoritmos pseudo-polinomiales: polinomiales en el valor numérico de los datos, pero no en su longitud en bits. Se llaman NP-difíciles en sentido débil, y la mochila es uno de ellos.
+
+Con estas definiciones, demostrar que nuestro problema es NP-difícil se reduce a una tarea concreta: construir una reducción desde la mochila.
+
+% ---------------------------------------------------------------------------
+\section{La aceleración de la cadena es NP-difícil}
+\label{sec:reduccion}
+
+Vamos a mostrar que $\MochilaDec \redp \AcelDec$. La dirección importa: traducir cualquier mochila a una cadena prueba que la cadena es al menos tan difícil como la mochila. La traducción al revés, que usamos en la Sección~\ref{sec:mochila}, solo muestra que la cadena no es más difícil.
+
+\paragraph{Versión de decisión, \AcelDec.} Dadas las etapas, el presupuesto $B$ y un umbral $T$, ¿existe un conjunto $A$ que quepa en el presupuesto y deje la cadena en a lo sumo $T$?
+\[
+  \exists\, A \subseteq \{1,\dots,n\} : \; \sum_{i \in A} c_i \le B \;\wedge\; \sum_{i=1}^{n} t_i - \sum_{i \in A} d_i \le T .
+\]
+
+\paragraph{Construcción.} A partir de un caso de \MochilaDec{} con pesos $w_i$, valores $v_i$, capacidad $W$ y umbral $V$, se crea una etapa por objeto:
+\[
+  c_i = w_i, \qquad d_i = v_i, \qquad t_i = v_i, \qquad B = W, \qquad T = \sum_{i=1}^{n} v_i - V .
+\]
+El costo de acelerar es el peso y la reducción es el valor, como en la correspondencia de la Sección~\ref{sec:mochila}. La duración normal se fija igual al valor por dos razones: así se cumple $0 \le d_i \le t_i$, y la duración total sin acelerar queda en $\sum t_i = \sum v_i$.
+
+\paragraph{La construcción con el ejemplo.} Tomemos la mochila de la Sección~\ref{sec:mochila}, con pesos $(4, 3, 5)$, valores $(3, 2, 4)$, $W = 10$, y preguntemos si se puede alcanzar valor $V = 7$. La construcción produce la cadena de la Tabla~\ref{tab:construccion}, con $B = 10$ y $T = 9 - 7 = 2$.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{cccc}
+    \toprule
+    Etapa & $t_i = v_i$ & $c_i = w_i$ & $d_i = v_i$ \\
+    \midrule
+    1 & 3 & 4 & 3 \\
+    2 & 2 & 3 & 2 \\
+    3 & 4 & 5 & 4 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Cadena construida a partir de la mochila del ejemplo.}
+  \label{tab:construccion}
+\end{table}
+
+Acelerar las etapas 1 y 3 cuesta $9 \le 10$ y deja la cadena en $9 - 7 = 2 \le T$: la respuesta es sí. La mochila también responde sí, con los objetos 1 y 3.
+
+\paragraph{Tiempo de la construcción.} Se recorren los $n$ objetos una vez y se calcula una suma: $O(n)$ operaciones sobre números de la entrada. Es polinomial en su longitud.
+
+\begin{proof}[Equivalencia]
+Para cualquier conjunto $X$ se cumple $\sum_{X} c_i = \sum_{X} w_i$ y $\sum_{X} d_i = \sum_{X} v_i$, y además $\sum_{i=1}^{n} t_i = \sum_{i=1}^{n} v_i$.
+
+($\Rightarrow$) Si $S$ resuelve la mochila, tomamos $A = S$. El costo cumple la restricción y la duración no pasa de $T$:
+\[
+  \sum_{i \in A} c_i = \sum_{i \in S} w_i \le W = B,
+  \qquad
+  \sum_{i=1}^{n} t_i - \sum_{i \in A} d_i = \sum_{i=1}^{n} v_i - \sum_{i \in S} v_i \le \sum_{i=1}^{n} v_i - V = T .
+\]
+
+($\Leftarrow$) Si $A$ resuelve \AcelDec, tomamos $S = A$. El peso cumple $\sum_{S} w_i = \sum_{A} c_i \le B = W$, y de la cota de duración sale el valor:
+\[
+  \sum_{i=1}^{n} v_i - \sum_{i \in A} v_i \le \sum_{i=1}^{n} v_i - V
+  \;\Longrightarrow\;
+  \sum_{i \in S} v_i \ge V . \qedhere
+\]
+\end{proof}
+
+\paragraph{Conclusión.} Como \MochilaDec{} es NP-completo y se reduce a \AcelDec{} en tiempo polinomial, \AcelDec{} es NP-difícil. También está en NP, porque el certificado $A$ se verifica sumando en $O(n)$, así que es NP-completo. La versión de optimización es NP-difícil: un algoritmo polinomial para ella respondería \AcelDec{} comparando la duración óptima con $T$. Y como una cadena en serie es un caso particular de un flujo general, el problema general es al menos igual de difícil.
+
+Si $\mathrm{P} \ne \mathrm{NP}$, no hay un algoritmo polinomial para nuestro problema. Eso no impide resolverlo de forma exacta: la misma correspondencia con la mochila da un algoritmo que es eficiente cuando el presupuesto no es enorme.
+
+% ---------------------------------------------------------------------------
+\section{Solución exacta con programación dinámica}
+\label{sec:dp}
+
+Gracias a la correspondencia de la Sección~\ref{sec:mochila}, el problema se resuelve con la programación dinámica de la mochila, usando $c_i$ como peso y $d_i$ como valor (Algoritmo~4.2.1 del enunciado).
+
+\paragraph{Subproblemas.} En lugar de probar los $2^n$ conjuntos, se resuelven problemas más pequeños: $DP[i][b]$ es la mayor reducción posible usando solo las primeras $i$ etapas y gastando como máximo $b$.
+
+\paragraph{Recurrencia.} Al llegar a la etapa $i$ hay dos opciones. Si no se acelera, lo mejor es lo que ya se lograba con las etapas anteriores y el mismo presupuesto. Si se acelera, y cabe, se gana $d_i$ y a las anteriores les queda $b - c_i$. Se toma la mejor de las dos:
+\[
+  DP[i][b] =
+  \begin{cases}
+    \max\big(DP[i-1][b],\; DP[i-1][b-c_i] + d_i\big) & \text{si } c_i \le b, \\
+    DP[i-1][b] & \text{si } c_i > b,
+  \end{cases}
+  \qquad DP[0][b] = 0 .
+\]
+
+\paragraph{Corrección.} Por inducción sobre $i$. Con cero etapas no hay reducción posible, así que $DP[0][b] = 0$ es correcto. Si $DP[i-1][\cdot]$ es correcto, toda solución óptima con las primeras $i$ etapas acelera la etapa $i$ o no la acelera. En cada caso, lo que queda es una solución óptima del subproblema con $i-1$ etapas: con presupuesto $b$ si no la acelera, o $b - c_i$ si sí. La recurrencia compara justamente esas dos opciones, así que $DP[n][B]$ es la reducción óptima.
+
+\paragraph{Reconstrucción.} La tabla dice cuánto se reduce, no qué etapas se aceleran. Para saberlo se recorre desde $(n, B)$ hacia atrás: si $DP[i][b] \ne DP[i-1][b]$, la etapa $i$ se aceleró y $b$ baja en $c_i$; si son iguales, no se aceleró.
+
+\paragraph{El ejemplo.} Con las etapas de la Tabla~\ref{tab:ejemplo} y $B = 10$, la tabla queda como en la Tabla~\ref{tab:dp}, y la reconstrucción, como en la Tabla~\ref{tab:reconstruccion}.
+
+\begin{table}[h]
+  \centering
+  \small
+  \begin{tabular}{l*{11}{c}}
+    \toprule
+    Etapas consideradas & $b{=}0$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+    \midrule
+    ninguna & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    1: $(c{=}4, d{=}3)$ & 0 & 0 & 0 & 0 & 3 & 3 & 3 & 3 & 3 & 3 & 3 \\
+    1--2: $(c{=}3, d{=}2)$ & 0 & 0 & 0 & 2 & 3 & 3 & 3 & 5 & 5 & 5 & 5 \\
+    1--3: $(c{=}5, d{=}4)$ & 0 & 0 & 0 & 2 & 3 & 4 & 4 & 5 & 6 & 7 & \textbf{7} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Tabla $DP$ del ejemplo.}
+  \label{tab:dp}
+\end{table}
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{cccccc}
+    \toprule
+    Etapa $i$ & $b$ & $DP[i][b]$ & $DP[i-1][b]$ & Decisión & Presupuesto restante \\
+    \midrule
+    3 & 10 & 7 & 5 & Acelerar & 5 \\
+    2 & 5 & 3 & 3 & No acelerar & 5 \\
+    1 & 5 & 3 & 0 & Acelerar & 1 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Reconstrucción a partir de $DP[3][10] = 7$.}
+  \label{tab:reconstruccion}
+\end{table}
+
+Se aceleran las etapas 1 y 3, que es el mismo óptimo encontrado probando todo en la Sección~\ref{sec:formalizacion}.
+
+\paragraph{Función de eficiencia.} Se cuentan las operaciones por partes. La inicialización escribe $(n+1)(B+1)$ casillas. Los dos ciclos anidados evalúan $n(B+1)$ casillas, cada una con un número constante de comparaciones y sumas. La reconstrucción da $n$ pasos constantes. Con constantes $a$, $e$ y $r$:
+\[
+  T(n, B) = a\,(n+1)(B+1) + e\,n\,(B+1) + r\,n = O(n \cdot B) .
+\]
+La última igualdad vale para $n, B \ge 1$; en general el costo es $O\big((n+1)(B+1)\big)$. La memoria también es $O(n \cdot B)$, porque la reconstrucción necesita la tabla completa.
+
+\paragraph{Por qué es pseudo-polinomial.} El costo crece con el valor de $B$, pero, como vimos en la Sección~\ref{sec:formalizacion}, la entrada solo ocupa $k = \lceil \log_2 (B+1) \rceil$ bits para escribir $B$. En términos de $k$, el costo es exponencial:
+\[
+  O(n \cdot B) = O(n \cdot 2^{k}) .
+\]
+Por ejemplo, pasar de $B = 10^3$ a $B = 10^6$ alarga la entrada en unos 10 bits, pero multiplica la tabla por mil. Esto encaja con la Sección~\ref{sec:reduccion}: el algoritmo no es polinomial en la longitud de la entrada, así que no contradice la NP-dificultad. El problema es NP-difícil en sentido débil, y en la práctica es tratable cuando $B$ es moderado.
+
+Queda verificar que la implementación hace lo que esta sección describe.
+
+% ---------------------------------------------------------------------------
+\section{Implementación y evidencia}
+\label{sec:evidencia}
+
+La solución está implementada en Python sin librerías externas. Para cada caso, el programa lee y valida los datos, ejecuta la programación dinámica de la Sección~\ref{sec:dp} y guarda el resultado, el tiempo y la traza de la reconstrucción. El detalle de cada archivo y función está en el manual técnico del repositorio.
+
+\paragraph{Cómo se validó.} Los casos de evaluación del curso no se comparten, así que el grupo construyó los suyos. Cada caso cubre una situación distinta: el ejemplo de este informe, casos borde y casos generados al azar con semilla fija. La respuesta esperada de los casos con $n \le 16$ se calculó por fuerza bruta, probando todos los subconjuntos, de forma independiente de la programación dinámica. Además, 14 pruebas automatizadas comparan el algoritmo contra fuerza bruta en 300 casos aleatorios.
+
+\begin{table}[h]
+  \centering
+  \small
+  \begin{tabular}{>{\ttfamily}l p{3.6cm} rrr r r}
+    \toprule
+    \normalfont Caso & Qué prueba & $n$ & $B$ & Costo & Duración & Tiempo (ms) \\
+    \midrule
+    ejemplo\_tres\_etapas & El ejemplo de este informe & 3 & 10 & 9 & $22 \to 15$ & 0,007 \\
+    ejemplo\_almuerzo & Presupuesto usado completo & 3 & 5 & 5 & $28 \to 6$ & 0,004 \\
+    voraz\_por\_razon\_falla & Elegir por la mejor razón $d/c$ no es óptimo & 3 & 50 & 50 & $280 \to 60$ & 0,011 \\
+    borde\_presupuesto\_cero & $B = 0$ & 2 & 0 & 0 & $9 \to 9$ & 0,002 \\
+    borde\_costo\_cero & Etapa con costo 0 & 2 & 0 & 0 & $9 \to 7$ & 0,003 \\
+    borde\_nada\_cabe & Ninguna etapa cabe & 2 & 2 & 0 & $9 \to 9$ & 0,003 \\
+    borde\_todo\_cabe & Todas las etapas caben & 3 & 100 & 6 & $16 \to 5$ & 0,025 \\
+    borde\_sin\_reduccion & Etapa con $d = 0$ & 2 & 5 & 2 & $9 \to 5$ & 0,003 \\
+    aleatorio\_n15\_s7 & Caso generado, $n = 15$ & 15 & 33 & 29 & $156 \to 69$ & 0,041 \\
+    aleatorio\_n200\_s1 & Caso grande, $n = 200$ & 200 & 824 & 824 & $2130 \to 1188$ & 13,204 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Casos propios. El tiempo es el promedio de 5 ejecuciones y varía entre corridas.}
+  \label{tab:casos}
+\end{table}
+
+Todos los casos con respuesta esperada coinciden con la fuerza bruta (Tabla~\ref{tab:casos}).
+
+El caso \texttt{voraz\_por\_razon\_falla} muestra por qué hace falta la programación dinámica. Una regla intuitiva, acelerar primero las etapas con mejor razón $d/c$, elige las etapas 1 y 2 y reduce 160. El óptimo, que el algoritmo encuentra, acelera las etapas 2 y 3 y reduce 220.
+
+Los tiempos crecen con el tamaño de la tabla: el caso de 200 etapas tiene unas 165\,000 casillas y tarda alrededor de 13~ms. La comparación sistemática entre el tiempo medido y $T(n, B)$ corresponde a la validación experimental de una entrega posterior.
+
+% ---------------------------------------------------------------------------
+\section{Conclusiones}
+
+Acelerar una cadena de etapas en serie bajo presupuesto es, con otros nombres, una mochila 0/1: el costo hace de peso y la reducción de tiempo hace de valor. Esa misma correspondencia, usada en direcciones opuestas, da los dos resultados principales del informe.
+
+\begin{itemize}
+  \item \textbf{Es difícil.} Toda mochila se traduce en tiempo $O(n)$ a una cadena con la misma respuesta. Por tanto, la versión de decisión es NP-completa y la de optimización es NP-difícil. Si $\mathrm{P} \ne \mathrm{NP}$, no existe un algoritmo polinomial.
+  \item \textbf{Se puede resolver de forma exacta.} La programación dinámica de la mochila encuentra el óptimo en $O(n \cdot B)$. Ese costo es pseudo-polinomial, lo que es coherente con la dificultad en sentido débil: el algoritmo es práctico cuando el presupuesto es moderado.
+\end{itemize}
+
+La implementación coincide con la fuerza bruta en todos los casos verificados, incluido uno donde una regla intuitiva falla.
+
+% ---------------------------------------------------------------------------
+\begin{thebibliography}{9}
+  \bibitem{cook} S.~A. Cook. The complexity of theorem-proving procedures. En \emph{Proceedings of the Third Annual ACM Symposium on Theory of Computing}, pp.~151--158, 1971.
+  \bibitem{karp} R.~M. Karp. Reducibility among combinatorial problems. En \emph{Complexity of Computer Computations}, pp.~85--103. Plenum Press, 1972.
+  \bibitem{enunciado} Proyecto Semestral, Análisis y Diseño de Algoritmos, 2026-B. Universidad de Caldas.
+  \bibitem{guia} Guía de requisitos, primera entrega, ADAG 2026-B. Universidad de Caldas.
+\end{thebibliography}
+
+\end{document}

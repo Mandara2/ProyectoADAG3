@@ -163,8 +163,10 @@ La lista de casos propios y qué prueba cada uno está en el [manual técnico](d
 │   └── casos/           casos propios con respuesta conocida
 ├── casos/               caso base que entregue el monitor
 ├── resultados/          salidas del programa
-└── docs/
-    └── MANUAL_TECNICO.md
+├── docs/
+│   └── MANUAL_TECNICO.md
+└── informe/
+    └── informe.tex      informe de la entrega, en LaTeX
 ```
 
 Solo `src/lectura.py` conoce el formato de entrada. Si los casos llegan en otro formato, ese es el único archivo que cambia.
