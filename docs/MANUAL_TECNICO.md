@@ -99,6 +99,19 @@ Por cada caso se crea `resultados/<id>.json`:
 
 Además se crea `resultados/resumen.json`, con una fila por caso.
 
+**Relación con la guía de la primera entrega.** Para el G3, la guía pide entregar, por cada caso, el resultado, el tiempo y una traza con los estados y decisiones de la programación dinámica, las etapas aceleradas y los costos. Cada `resultados/<id>.json` cubre esos puntos así:
+
+| Lo que pide la guía | Campo de la salida |
+| --- | --- |
+| Resultado | `etapas_aceleradas`, `reduccion`, `duracion_original`, `duracion_final` |
+| Tiempo por caso | `tiempo_ms` |
+| Estados y decisiones de la DP | `traza.reconstruccion` y, si es pequeña, `traza.tabla` |
+| Etapas aceleradas | `etapas_aceleradas` |
+| Costos | `costo_usado` y `presupuesto` |
+| Traza identificada por caso | El archivo se llama igual que el `id` del caso |
+
+La cobertura de auditoría que menciona la guía no aplica, porque esta entrega cubre solo el primer problema del Subproyecto 3. El anexo A del informe muestra la traza de los casos pequeños.
+
 ## 6. Estructura del código
 
 ```text

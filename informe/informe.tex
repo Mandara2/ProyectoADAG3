@@ -147,7 +147,6 @@ Se lee igual que el objetivo~\eqref{eq:objetivo}: entre todos los conjuntos de o
 \[
   \exists\, S \subseteq \{1,\dots,n\} : \; \sum_{i \in S} w_i \le W \;\wedge\; \sum_{i \in S} v_i \ge V .
 \]
-El símbolo $\exists$ se lee ``existe'', los dos puntos se leen ``tal que'' y $\wedge$ se lee ``y''. La fórmula dice: existe un conjunto $S$ de objetos tal que su peso no pasa de $W$ y su valor es al menos $V$.
 
 Dos hechos conocidos de este problema se usan más adelante. \MochilaDec{} es NP-completo \cite{karp}. Y la versión de optimización tiene un algoritmo exacto de programación dinámica que cuesta $O(n \cdot W)$, es decir, un número de pasos proporcional a $n$ por $W$.
 
@@ -205,7 +204,7 @@ Si $B$ tuviera un algoritmo polinomial, $A$ también: bastaría con transformar 
   \item $X$ es \textbf{NP-completo} si es NP-difícil y además está en NP.
 \end{itemize}
 
-\paragraph{Cómo se prueba en la práctica.} Cook \cite{cook} probó que SAT es NP-completo, y Karp \cite{karp} extendió el resultado a otros problemas, entre ellos la mochila, mediante cadenas de reducciones. Gracias a la transitividad, para probar que un problema nuevo es NP-difícil basta con reducir a él un problema que ya se sabe NP-difícil.
+\paragraph{Cómo se prueba en la práctica.} Cook \cite{cook} probó que SAT (el problema de satisfacibilidad booleana: dada una fórmula lógica, decidir si existe una asignación de verdadero/falso a sus variables que la haga verdadera) es NP-completo, y Karp \cite{karp} extendió el resultado a otros problemas, entre ellos la mochila, mediante cadenas de reducciones. Gracias a la transitividad, para probar que un problema nuevo es NP-difícil basta con reducir a él un problema que ya se sabe NP-difícil.
 
 \paragraph{Por qué importa.} No se sabe si $\mathrm{P} = \mathrm{NP}$, pero se conjetura que no. Si $\mathrm{P} \ne \mathrm{NP}$, ningún problema NP-difícil tiene un algoritmo polinomial. Demostrar que un problema es NP-difícil justifica, entonces, no buscar un algoritmo polinomial y aceptar otro tipo de solución.
 
@@ -388,23 +387,28 @@ La solución está implementada en Python sin librerías externas. Para cada cas
 
 \paragraph{Cómo se validó.} Los casos de evaluación del curso no se comparten, así que el grupo construyó los suyos. Cada caso cubre una situación distinta: el ejemplo de este informe, casos borde y casos generados al azar con semilla fija. La respuesta esperada de los casos con $n \le 16$ se calculó por fuerza bruta, probando todos los subconjuntos, de forma independiente de la programación dinámica. Además, 14 pruebas automatizadas comparan el algoritmo contra fuerza bruta en 300 casos aleatorios.
 
+\paragraph{Qué se entrega por cada caso.} La guía de la entrega pide, por caso, el resultado, el tiempo y la traza: los estados y decisiones de la programación dinámica, las etapas aceleradas y los costos. Todo eso está en el archivo \texttt{resultados/<id>.json} del repositorio, que lleva el mismo nombre del caso. La traza registra cada paso de la reconstrucción ($i$, $b$, $DP[i][b]$, $DP[i-1][b]$, la decisión y el presupuesto restante), e incluye la tabla completa cuando tiene menos de 500 casillas. La Tabla~\ref{tab:casos} resume los resultados, y el Anexo~\ref{anexo:trazas} muestra la traza de los casos pequeños.
+
+La guía también menciona la cobertura de auditoría. No aplica aquí, porque esta entrega cubre solo el primer problema del Subproyecto~3, por indicación del curso.
+
 \begin{table}[h]
   \centering
-  \small
-  \begin{tabular}{>{\ttfamily}l p{3.6cm} rrr r r}
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{>{\ttfamily}l p{2.9cm} rr p{1.5cm} r r r}
     \toprule
-    \normalfont Caso & Qué prueba & $n$ & $B$ & Costo & Duración & Tiempo (ms) \\
+    \normalfont Caso & Qué prueba & $n$ & $B$ & Etapas aceleradas & Costo & Duración & Tiempo (ms) \\
     \midrule
-    ejemplo\_tres\_etapas & El ejemplo de este informe & 3 & 10 & 9 & $22 \to 15$ & 0,007 \\
-    ejemplo\_almuerzo & Presupuesto usado completo & 3 & 5 & 5 & $28 \to 6$ & 0,004 \\
-    voraz\_por\_razon\_falla & Elegir por la mejor razón $d/c$ no es óptimo & 3 & 50 & 50 & $280 \to 60$ & 0,011 \\
-    borde\_presupuesto\_cero & $B = 0$ & 2 & 0 & 0 & $9 \to 9$ & 0,002 \\
-    borde\_costo\_cero & Etapa con costo 0 & 2 & 0 & 0 & $9 \to 7$ & 0,003 \\
-    borde\_nada\_cabe & Ninguna etapa cabe & 2 & 2 & 0 & $9 \to 9$ & 0,003 \\
-    borde\_todo\_cabe & Todas las etapas caben & 3 & 100 & 6 & $16 \to 5$ & 0,025 \\
-    borde\_sin\_reduccion & Etapa con $d = 0$ & 2 & 5 & 2 & $9 \to 5$ & 0,003 \\
-    aleatorio\_n15\_s7 & Caso generado, $n = 15$ & 15 & 33 & 29 & $156 \to 69$ & 0,041 \\
-    aleatorio\_n200\_s1 & Caso grande, $n = 200$ & 200 & 824 & 824 & $2130 \to 1188$ & 13,204 \\
+    ejemplo\_tres\_etapas & El ejemplo de este informe & 3 & 10 & 1, 3 & 9 & $22 \to 15$ & 0,007 \\
+    ejemplo\_almuerzo & Presupuesto usado completo & 3 & 5 & 2, 3 & 5 & $28 \to 6$ & 0,004 \\
+    voraz\_por\_razon\_falla & Elegir por la mejor razón $d/c$ no es óptimo & 3 & 50 & 2, 3 & 50 & $280 \to 60$ & 0,011 \\
+    borde\_presupuesto\_cero & $B = 0$ & 2 & 0 & ninguna & 0 & $9 \to 9$ & 0,002 \\
+    borde\_costo\_cero & Etapa con costo 0 & 2 & 0 & 1 & 0 & $9 \to 7$ & 0,003 \\
+    borde\_nada\_cabe & Ninguna etapa cabe & 2 & 2 & ninguna & 0 & $9 \to 9$ & 0,003 \\
+    borde\_todo\_cabe & Todas las etapas caben & 3 & 100 & 1, 2, 3 & 6 & $16 \to 5$ & 0,025 \\
+    borde\_sin\_reduccion & Etapa con $d = 0$ & 2 & 5 & 2 & 2 & $9 \to 5$ & 0,003 \\
+    aleatorio\_n15\_s7 & Caso generado, $n = 15$ & 15 & 33 & 11 etapas & 29 & $156 \to 69$ & 0,041 \\
+    aleatorio\_n200\_s1 & Caso grande, $n = 200$ & 200 & 824 & 113 etapas & 824 & $2130 \to 1188$ & 13,204 \\
     \bottomrule
   \end{tabular}
   \caption{Casos propios. El tiempo es el promedio de 5 ejecuciones y varía entre corridas.}
@@ -428,6 +432,113 @@ Acelerar una cadena de etapas en serie bajo presupuesto es, con otros nombres, u
 \end{itemize}
 
 La implementación coincide con la fuerza bruta en todos los casos verificados, incluido uno donde una regla intuitiva falla.
+
+\appendix
+\section{Trazas de los casos pequeños}
+\label{anexo:trazas}
+
+Este anexo muestra la reconstrucción de cada caso propio pequeño, tal como la escribe el programa en \texttt{resultados/<id>.json}. La traza del ejemplo principal, \texttt{ejemplo\_tres\_etapas}, está en la Tabla~\ref{tab:reconstruccion}. Cada fila es un paso de la reconstrucción: si $DP[i][b] \ne DP[i-1][b]$, la etapa $i$ se acelera y se descuenta su costo.
+
+\paragraph{\texttt{ejemplo\_almuerzo}.} El presupuesto se usa completo. $B = 5$; etapas $(t, c, d)$: $1 = (6, 1, 6)$, $2 = (10, 2, 10)$, $3 = (12, 3, 12)$.
+
+\begin{center}
+  \begin{tabular}{cccccc}
+    \toprule
+    Etapa $i$ & $b$ & $DP[i][b]$ & $DP[i-1][b]$ & Decisión & Presupuesto restante \\
+    \midrule
+    3 & 5 & 22 & 16 & Acelerar & 2 \\
+    2 & 2 & 10 & 6 & Acelerar & 0 \\
+    1 & 0 & 0 & 0 & No acelerar & 0 \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+Aceleradas: 2, 3. Costo 5 de 5. Duración 28 $\to$ 6.
+
+\paragraph{\texttt{voraz\_por\_razon\_falla}.} Elegir por la mejor razón $d/c$ no es óptimo. $B = 50$; etapas $(t, c, d)$: $1 = (60, 10, 60)$, $2 = (100, 20, 100)$, $3 = (120, 30, 120)$.
+
+\begin{center}
+  \begin{tabular}{cccccc}
+    \toprule
+    Etapa $i$ & $b$ & $DP[i][b]$ & $DP[i-1][b]$ & Decisión & Presupuesto restante \\
+    \midrule
+    3 & 50 & 220 & 160 & Acelerar & 20 \\
+    2 & 20 & 100 & 60 & Acelerar & 0 \\
+    1 & 0 & 0 & 0 & No acelerar & 0 \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+Aceleradas: 2, 3. Costo 50 de 50. Duración 280 $\to$ 60.
+
+\paragraph{\texttt{borde\_presupuesto\_cero}.} Presupuesto $B = 0$. $B = 0$; etapas $(t, c, d)$: $1 = (5, 2, 3)$, $2 = (4, 1, 1)$.
+
+\begin{center}
+  \begin{tabular}{cccccc}
+    \toprule
+    Etapa $i$ & $b$ & $DP[i][b]$ & $DP[i-1][b]$ & Decisión & Presupuesto restante \\
+    \midrule
+    2 & 0 & 0 & 0 & No acelerar & 0 \\
+    1 & 0 & 0 & 0 & No acelerar & 0 \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+Aceleradas: ninguna. Costo 0 de 0. Duración 9 $\to$ 9.
+
+\paragraph{\texttt{borde\_costo\_cero}.} Una etapa con costo 0. $B = 0$; etapas $(t, c, d)$: $1 = (5, 0, 2)$, $2 = (4, 1, 4)$.
+
+\begin{center}
+  \begin{tabular}{cccccc}
+    \toprule
+    Etapa $i$ & $b$ & $DP[i][b]$ & $DP[i-1][b]$ & Decisión & Presupuesto restante \\
+    \midrule
+    2 & 0 & 2 & 2 & No acelerar & 0 \\
+    1 & 0 & 2 & 0 & Acelerar & 0 \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+Aceleradas: 1. Costo 0 de 0. Duración 9 $\to$ 7.
+
+\paragraph{\texttt{borde\_nada\_cabe}.} Ninguna etapa cabe en el presupuesto. $B = 2$; etapas $(t, c, d)$: $1 = (5, 3, 3)$, $2 = (4, 5, 1)$.
+
+\begin{center}
+  \begin{tabular}{cccccc}
+    \toprule
+    Etapa $i$ & $b$ & $DP[i][b]$ & $DP[i-1][b]$ & Decisión & Presupuesto restante \\
+    \midrule
+    2 & 2 & 0 & 0 & No acelerar & 2 \\
+    1 & 2 & 0 & 0 & No acelerar & 2 \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+Aceleradas: ninguna. Costo 0 de 2. Duración 9 $\to$ 9.
+
+\paragraph{\texttt{borde\_todo\_cabe}.} Todas las etapas caben. $B = 100$; etapas $(t, c, d)$: $1 = (5, 2, 3)$, $2 = (4, 1, 1)$, $3 = (7, 3, 7)$.
+
+\begin{center}
+  \begin{tabular}{cccccc}
+    \toprule
+    Etapa $i$ & $b$ & $DP[i][b]$ & $DP[i-1][b]$ & Decisión & Presupuesto restante \\
+    \midrule
+    3 & 100 & 11 & 4 & Acelerar & 97 \\
+    2 & 97 & 4 & 3 & Acelerar & 96 \\
+    1 & 96 & 3 & 0 & Acelerar & 94 \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+Aceleradas: 1, 2, 3. Costo 6 de 100. Duración 16 $\to$ 5.
+
+\paragraph{\texttt{borde\_sin\_reduccion}.} Una etapa con reducción $d = 0$. $B = 5$; etapas $(t, c, d)$: $1 = (5, 1, 0)$, $2 = (4, 2, 4)$.
+
+\begin{center}
+  \begin{tabular}{cccccc}
+    \toprule
+    Etapa $i$ & $b$ & $DP[i][b]$ & $DP[i-1][b]$ & Decisión & Presupuesto restante \\
+    \midrule
+    2 & 5 & 4 & 0 & Acelerar & 3 \\
+    1 & 3 & 0 & 0 & No acelerar & 3 \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+Aceleradas: 2. Costo 2 de 5. Duración 9 $\to$ 5. La etapa 1 no se acelera porque no ahorra tiempo: acelerarla gastaría presupuesto sin cambiar la duración.
 
 % ---------------------------------------------------------------------------
 \begin{thebibliography}{9}
