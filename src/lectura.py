@@ -21,14 +21,20 @@ def _entero_no_negativo(valor, nombre):
 
 def validar_caso(datos):
     """Revisa un caso ya cargado y devuelve (id, B, etapas)."""
+    if not isinstance(datos, dict):
+        raise CasoInvalido("el caso debe ser un objeto JSON")
     for campo in ("id", "B", "etapas"):
         if campo not in datos:
             raise CasoInvalido(f"falta el campo '{campo}'")
+    if not isinstance(datos["etapas"], list):
+        raise CasoInvalido("'etapas' debe ser una lista")
 
     presupuesto = _entero_no_negativo(datos["B"], "B")
 
     etapas = []
     for i, etapa in enumerate(datos["etapas"], start=1):
+        if not isinstance(etapa, dict):
+            raise CasoInvalido(f"la etapa {i} debe ser un objeto con t, c y d")
         for campo in ("t", "c", "d"):
             if campo not in etapa:
                 raise CasoInvalido(f"a la etapa {i} le falta '{campo}'")
@@ -44,10 +50,17 @@ def validar_caso(datos):
 
 def leer_caso(ruta):
     """Lee un caso desde un archivo JSON."""
-    with open(ruta, encoding="utf-8") as archivo:
-        return validar_caso(json.load(archivo))
+    try:
+        with open(ruta, encoding="utf-8") as archivo:
+            datos = json.load(archivo)
+    except json.JSONDecodeError as error:
+        raise CasoInvalido(f"el archivo no es JSON válido ({error})") from error
+    return validar_caso(datos)
 
 
-def listar_casos(carpeta):
-    """Devuelve las rutas de los casos de la carpeta, en orden alfabético."""
-    return sorted(Path(carpeta).glob("*.json"))
+def listar_casos(ruta):
+    """Devuelve los casos a correr: el archivo dado o los .json de la carpeta."""
+    ruta = Path(ruta)
+    if ruta.is_file():
+        return [ruta]
+    return sorted(ruta.glob("*.json"))

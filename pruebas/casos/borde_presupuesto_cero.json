@@ -1,0 +1,20 @@
+{
+  "id": "borde_presupuesto_cero",
+  "B": 0,
+  "etapas": [
+    {
+      "t": 5,
+      "c": 2,
+      "d": 3
+    },
+    {
+      "t": 4,
+      "c": 1,
+      "d": 1
+    }
+  ],
+  "esperado": {
+    "reduccion": 0,
+    "duracion_final": 9
+  }
+}

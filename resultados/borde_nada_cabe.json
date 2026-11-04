@@ -1,0 +1,49 @@
+{
+  "id": "borde_nada_cabe",
+  "n": 2,
+  "tiempo_ms": 0.003119999973932863,
+  "etapas_aceleradas": [],
+  "costo_usado": 0,
+  "presupuesto": 2,
+  "reduccion": 0,
+  "duracion_original": 9,
+  "duracion_final": 9,
+  "traza": {
+    "casillas_tabla": 9,
+    "reconstruccion": [
+      {
+        "etapa": 2,
+        "b": 2,
+        "DP[i][b]": 0,
+        "DP[i-1][b]": 0,
+        "decision": "no acelerar",
+        "presupuesto_restante": 2
+      },
+      {
+        "etapa": 1,
+        "b": 2,
+        "DP[i][b]": 0,
+        "DP[i-1][b]": 0,
+        "decision": "no acelerar",
+        "presupuesto_restante": 2
+      }
+    ],
+    "tabla": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ]
+  }
+}

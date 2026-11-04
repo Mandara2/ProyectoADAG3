@@ -1,0 +1,43 @@
+{
+  "id": "borde_presupuesto_cero",
+  "n": 2,
+  "tiempo_ms": 0.002480000011928496,
+  "etapas_aceleradas": [],
+  "costo_usado": 0,
+  "presupuesto": 0,
+  "reduccion": 0,
+  "duracion_original": 9,
+  "duracion_final": 9,
+  "traza": {
+    "casillas_tabla": 3,
+    "reconstruccion": [
+      {
+        "etapa": 2,
+        "b": 0,
+        "DP[i][b]": 0,
+        "DP[i-1][b]": 0,
+        "decision": "no acelerar",
+        "presupuesto_restante": 0
+      },
+      {
+        "etapa": 1,
+        "b": 0,
+        "DP[i][b]": 0,
+        "DP[i-1][b]": 0,
+        "decision": "no acelerar",
+        "presupuesto_restante": 0
+      }
+    ],
+    "tabla": [
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ]
+    ]
+  }
+}

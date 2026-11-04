@@ -1,0 +1,25 @@
+{
+  "id": "voraz_por_razon_falla",
+  "B": 50,
+  "etapas": [
+    {
+      "t": 60,
+      "c": 10,
+      "d": 60
+    },
+    {
+      "t": 100,
+      "c": 20,
+      "d": 100
+    },
+    {
+      "t": 120,
+      "c": 30,
+      "d": 120
+    }
+  ],
+  "esperado": {
+    "reduccion": 220,
+    "duracion_final": 60
+  }
+}

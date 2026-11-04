@@ -1,1 +1,1 @@
-Aquí van los casos de la profesora, sin modificar.
+Aquí va el caso base que entregue el monitor, sin modificar. Los casos propios están en `pruebas/casos/`.

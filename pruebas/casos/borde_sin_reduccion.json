@@ -1,0 +1,20 @@
+{
+  "id": "borde_sin_reduccion",
+  "B": 5,
+  "etapas": [
+    {
+      "t": 5,
+      "c": 1,
+      "d": 0
+    },
+    {
+      "t": 4,
+      "c": 2,
+      "d": 4
+    }
+  ],
+  "esperado": {
+    "reduccion": 4,
+    "duracion_final": 5
+  }
+}

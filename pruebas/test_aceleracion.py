@@ -9,7 +9,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from aceleracion import resolver
-from lectura import CasoInvalido, validar_caso
+from lectura import CasoInvalido, leer_caso, listar_casos, validar_caso
+
+CARPETA_CASOS = Path(__file__).resolve().parent / "casos"
 
 
 def etapas(*ternas):
@@ -83,6 +85,30 @@ class ContraFuerzaBruta(unittest.TestCase):
             )
 
 
+class CasosPropios(unittest.TestCase):
+    """Corre cada caso de pruebas/casos y lo compara con su campo 'esperado'."""
+
+    def test_respuesta_esperada(self):
+        import json
+
+        con_esperado = 0
+        for ruta in listar_casos(CARPETA_CASOS):
+            _, presupuesto, lista = leer_caso(ruta)
+            esperado = json.loads(ruta.read_text(encoding="utf-8")).get("esperado")
+            r = resolver(lista, presupuesto)
+            with self.subTest(caso=ruta.name):
+                self.assertLessEqual(r["costo_usado"], presupuesto)
+                if esperado:
+                    con_esperado += 1
+                    self.assertEqual(r["reduccion"], esperado["reduccion"])
+                    self.assertEqual(r["duracion_final"], esperado["duracion_final"])
+        self.assertGreater(con_esperado, 0)
+
+    def test_listar_un_solo_archivo(self):
+        ruta = CARPETA_CASOS / "ejemplo_almuerzo.json"
+        self.assertEqual(listar_casos(ruta), [ruta])
+
+
 class Validacion(unittest.TestCase):
     def test_d_mayor_que_t(self):
         caso = {"id": "x", "B": 5, "etapas": [{"t": 2, "c": 1, "d": 3}]}
@@ -92,6 +118,19 @@ class Validacion(unittest.TestCase):
     def test_presupuesto_no_entero(self):
         with self.assertRaises(CasoInvalido):
             validar_caso({"id": "x", "B": 2.5, "etapas": []})
+
+    def test_etapas_no_es_lista(self):
+        with self.assertRaises(CasoInvalido):
+            validar_caso({"id": "x", "B": 2, "etapas": 3})
+
+    def test_json_mal_escrito(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as carpeta:
+            ruta = Path(carpeta) / "roto.json"
+            ruta.write_text("{ esto no es json", encoding="utf-8")
+            with self.assertRaises(CasoInvalido):
+                leer_caso(ruta)
 
 
 if __name__ == "__main__":

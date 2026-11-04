@@ -2,6 +2,8 @@
 
 Proyecto semestral de **Análisis y Diseño de Algoritmos (2026-B)**, Universidad de Caldas, Grupo 3.
 
+**Integrantes:** Rafael Medina e Isabela Guerrero.
+
 Dada una cadena de etapas en serie, el programa elige cuáles acelerar, sin pasarse de un presupuesto, para que la cadena termine lo antes posible. Lo resuelve de forma exacta con programación dinámica y entrega, por cada caso, el resultado, el tiempo y una traza de las decisiones.
 
 ## Contenido
@@ -61,29 +63,35 @@ cd <carpeta-del-repositorio>
 
 ## Uso
 
-Correr los casos de ejemplo:
+Correr todos los casos propios:
 
 ```bash
 python src/main.py pruebas/casos
 ```
 
-Correr los casos de la profesora, guardados en `casos/`:
+Correr un solo caso:
 
 ```bash
-python src/main.py casos
+python src/main.py pruebas/casos/ejemplo_tres_etapas.json
 ```
 
 Por defecto las salidas van a `resultados/`. Se puede indicar otra carpeta como segundo argumento:
 
 ```bash
-python src/main.py casos otra_carpeta
+python src/main.py pruebas/casos otra_carpeta
 ```
 
-Salida en pantalla con los casos de ejemplo (el tiempo varía según el equipo):
+Generar un caso aleatorio reproducible con `n` etapas y una semilla:
+
+```bash
+python src/generar_casos.py 50 3
+```
+
+Ejemplo de salida en pantalla (el tiempo varía según el equipo):
 
 ```text
-ejemplo_almuerzo: acelerar [2, 3], costo 5/5, duración 28 -> 6, 0.006 ms
-ejemplo_tres_etapas: acelerar [1, 3], costo 9/10, duración 22 -> 15, 0.006 ms
+ejemplo_tres_etapas: acelerar [1, 3], costo 9/10, duración 22 -> 15, 0.007 ms
+voraz_por_razon_falla: acelerar [2, 3], costo 50/50, duración 280 -> 60, 0.011 ms
 ```
 
 ## Formato de entrada
@@ -110,7 +118,7 @@ Un archivo `.json` por caso:
 | `c` | Costo de acelerarla |
 | `d` | Tiempo que se reduce al acelerarla |
 
-Todos los números son enteros mayores o iguales a 0 y debe cumplirse `d <= t`. Un caso inválido se reporta en pantalla y no detiene los demás.
+Todos los números son enteros mayores o iguales a 0 y debe cumplirse `d <= t`. Un caso inválido se reporta en pantalla y no detiene los demás. El campo opcional `esperado` guarda la respuesta conocida y solo lo usan las pruebas.
 
 ## Formato de salida
 
@@ -132,12 +140,15 @@ Por cada caso se crea `resultados/<id>.json`, y además `resultados/resumen.json
 python -m unittest discover -s pruebas
 ```
 
-Las 10 pruebas cubren:
+Las 14 pruebas cubren:
 
 - Los ejemplos con respuesta conocida.
 - Los casos borde: presupuesto 0, sin etapas, costo mayor que el presupuesto y costo 0.
-- La validación de casos inválidos.
+- Los 10 casos propios de `pruebas/casos`, comparados con su respuesta esperada, que se calculó por fuerza bruta.
+- La validación de casos inválidos, incluido un JSON mal escrito.
 - 300 casos aleatorios con semilla fija, comparados contra fuerza bruta.
+
+La lista de casos propios y qué prueba cada uno está en el [manual técnico](docs/MANUAL_TECNICO.md#8-casos-de-prueba-propios).
 
 ## Estructura del repositorio
 
@@ -145,11 +156,12 @@ Las 10 pruebas cubren:
 ├── src/
 │   ├── lectura.py       lee y valida los casos
 │   ├── aceleracion.py   tabla DP, reconstrucción y traza
-│   └── main.py          corre los casos, mide el tiempo y guarda las salidas
+│   ├── main.py          corre los casos, mide el tiempo y guarda las salidas
+│   └── generar_casos.py crea casos aleatorios reproducibles
 ├── pruebas/
 │   ├── test_aceleracion.py
-│   └── casos/           casos de ejemplo con respuesta conocida
-├── casos/               casos de la profesora, sin modificar
+│   └── casos/           casos propios con respuesta conocida
+├── casos/               caso base que entregue el monitor
 ├── resultados/          salidas del programa
 └── docs/
     └── MANUAL_TECNICO.md

@@ -1,0 +1,25 @@
+{
+  "id": "borde_todo_cabe",
+  "B": 100,
+  "etapas": [
+    {
+      "t": 5,
+      "c": 2,
+      "d": 3
+    },
+    {
+      "t": 4,
+      "c": 1,
+      "d": 1
+    },
+    {
+      "t": 7,
+      "c": 3,
+      "d": 7
+    }
+  ],
+  "esperado": {
+    "reduccion": 11,
+    "duracion_final": 5
+  }
+}

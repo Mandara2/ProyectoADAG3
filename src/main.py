@@ -1,6 +1,6 @@
-"""Corre todos los casos de una carpeta y guarda resultado, tiempo y traza.
+"""Corre uno o varios casos y guarda resultado, tiempo y traza.
 
-Uso: python src/main.py casos/ [carpeta_de_salida]
+Uso: python src/main.py <archivo.json | carpeta> [carpeta_de_salida]
 """
 
 import json
@@ -59,7 +59,7 @@ def correr_caso(ruta, salida):
 
 def main():
     if len(sys.argv) < 2:
-        print("Uso: python src/main.py <carpeta_de_casos> [carpeta_de_salida]")
+        print("Uso: python src/main.py <archivo.json | carpeta> [carpeta_de_salida]")
         return 1
 
     entrada = Path(sys.argv[1])
@@ -68,7 +68,7 @@ def main():
 
     casos = listar_casos(entrada)
     if not casos:
-        print(f"No hay archivos .json en {entrada}")
+        print(f"No se encontraron casos .json en {entrada}")
         return 1
 
     resumen = [correr_caso(ruta, salida) for ruta in casos]
