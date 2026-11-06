@@ -187,7 +187,9 @@ La lista de casos propios y qué prueba cada uno está en el [manual técnico](d
 ├── casos/               caso base que entregue el monitor
 ├── resultados/          salidas del programa; comprobacion/ guarda los registros de fuerza bruta
 ├── docs/
-│   └── MANUAL_TECNICO.md
+│   ├── manual_tecnico.tex manual técnico en LaTeX (mismo estilo que el informe)
+│   ├── MANUAL_TECNICO.md  manual técnico en Markdown
+│   └── MANUAL_TECNICO.pdf manual técnico en PDF
 └── informe/
     └── informe.tex      informe de la entrega, en LaTeX
 ```
@@ -200,4 +202,4 @@ Solo `src/lectura.py` conoce el formato de entrada. Si los casos llegan en otro 
 - Solo acepta valores enteros.
 - Cuando hay varias soluciones óptimas, devuelve una sola.
 
-Más detalles en el [manual técnico](docs/MANUAL_TECNICO.md).
+Más detalles en el [manual técnico](docs/MANUAL_TECNICO.md), que también está en LaTeX (`docs/manual_tecnico.tex`) y en PDF (`docs/MANUAL_TECNICO.pdf`).

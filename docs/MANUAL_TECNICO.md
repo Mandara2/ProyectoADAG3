@@ -152,8 +152,9 @@ resultados/
 └── comprobacion/     registro de la comprobación por fuerza bruta de cada caso
 casos/                caso de referencia del monitor (otro formato; ver sección 4)
 docs/
-├── MANUAL_TECNICO.md  este manual
-└── MANUAL_TECNICO.pdf
+├── manual_tecnico.tex este manual, en LaTeX (mismo estilo que el informe)
+├── MANUAL_TECNICO.md  este manual, en Markdown
+└── MANUAL_TECNICO.pdf versión en PDF
 informe/
 └── informe.tex       informe de la entrega
 ```

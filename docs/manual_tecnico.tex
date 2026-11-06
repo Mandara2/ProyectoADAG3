@@ -1,0 +1,568 @@
+% Manual técnico de la primera entrega. Mismo estilo que informe/informe.tex.
+% Compilar con pdflatex (por ejemplo, en Overleaf).
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage[margin=2.5cm,top=2.6cm,bottom=2.6cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,array,tabularx}
+\usepackage[table]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{float}
+\usepackage[colorlinks=true,linkcolor=acento,citecolor=acento,urlcolor=acento]{hyperref}
+
+% ---------- colores ----------
+\definecolor{fondo}{HTML}{263A42}
+\definecolor{franja}{HTML}{7D969E}
+\definecolor{acento}{HTML}{2F5F73}
+\definecolor{celda}{HTML}{CFDAE0}
+\definecolor{gris}{HTML}{6B7C84}
+\definecolor{codigo}{HTML}{F4F7F8}
+
+\AtBeginDocument{\renewcommand{\tablename}{Tabla}\renewcommand{\contentsname}{Contenido}}
+
+% ---------- macros ----------
+\newcommand{\cod}[1]{\texttt{#1}}
+\newcommand{\DP}[2]{\mathrm{DP}[#1][#2]}
+
+% ---------- bloques de código ----------
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codigo},
+  frame=single,
+  rulecolor=\color{celda},
+  framesep=4pt,
+  xleftmargin=6pt,
+  xrightmargin=6pt,
+  columns=fixed,
+  keepspaces=true,
+  showstringspaces=false,
+  breaklines=true,
+  aboveskip=8pt,
+  belowskip=8pt,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+           {ñ}{{\~n}}1 {Ñ}{{\~N}}1
+}
+
+% ---------- encabezados ----------
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Análisis y Diseño de Algoritmos \,$\cdot$\, 2026-B}
+\rhead{Grupo 3 \,$\cdot$\, Manual técnico}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+\titlespacing*{\section}{0pt}{22pt}{10pt}
+\titlespacing*{\subsection}{0pt}{16pt}{7pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% ---------- índice ----------
+\renewcommand{\cftsecfont}{\bfseries\color{acento}}
+\renewcommand{\cftsecpagefont}{\bfseries}
+\renewcommand{\cftsubsecfont}{\color{acento}}
+\renewcommand{\cftsubsecpagefont}{\color{acento}}
+\setlength{\cftbeforesecskip}{9pt}
+\setlength{\cftbeforesubsecskip}{3pt}
+\renewcommand{\cftdotsep}{2}
+
+\setlist[itemize]{itemsep=2pt,topsep=2pt}
+\setlist[enumerate]{itemsep=2pt,topsep=2pt}
+
+% Tablas con la primera fila en el color de fondo del informe.
+\newcommand{\encabezado}{\rowcolor{fondo}}
+\newcommand{\blanco}[1]{\textcolor{white}{\textbf{#1}}}
+
+\begin{document}
+
+% ======================= PORTADA =======================
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+  \fill[fondo] (current page.north west) rectangle ($(current page.north east)+(0,-9.6cm)$);
+  \fill[franja] ($(current page.north west)+(0,-9.6cm)$) rectangle ($(current page.north east)+(0,-9.9cm)$);
+  \node[anchor=north west,text=white,inner sep=0] at ($(current page.north west)+(2.5cm,-1.9cm)$) {%
+    \begin{minipage}{14cm}
+      {\scshape Universidad de Caldas}\\[2pt]
+      {\small Análisis y Diseño de Algoritmos \,$\cdot$\, 2026-B}\\[26pt]
+      {\fontsize{26}{33}\selectfont\bfseries Manual técnico}\\[8pt]
+      {\large Aceleración de la cadena bajo presupuesto}\\[6pt]
+      {\normalsize Primera entrega \,$\cdot$\, Subproyecto 3 (Grupo 3)}
+    \end{minipage}};
+\end{tikzpicture}
+\vspace*{10.2cm}
+
+\begin{tabular}{@{}p{3.6cm}l@{}}
+  \textbf{\color{acento}Integrantes} & Rafael Medina\\[6pt]
+   & Isabela Guerrero\\[6pt]
+  \textbf{\color{acento}Asignatura} & Análisis y Diseño de Algoritmos, 2026-B\\[6pt]
+  \textbf{\color{acento}Institución} & Universidad de Caldas\\[6pt]
+  \textbf{\color{acento}Entrega} & Viernes 6 de noviembre de 2026\\[6pt]
+  \textbf{\color{acento}Repositorio} & {\small\ttfamily\href{https://github.com/Mandara2/ProyectoADAG3}{https://github.com/Mandara2/ProyectoADAG3}}\\[6pt]
+  \textbf{\color{acento}Versión} & Python 3.10 o superior (probado con 3.12.10)
+\end{tabular}
+\end{titlepage}
+
+\setcounter{page}{1}
+\tableofcontents
+\newpage
+
+% ======================= PRESENTACIÓN =======================
+\section*{Presentación}
+\addcontentsline{toc}{section}{Presentación}
+
+Este manual explica cómo está construida la solución, cómo se ejecuta, qué formatos usa, cómo se verificaron sus resultados y cuáles son sus límites. El análisis teórico del problema (formalización, NP-dureza y función de eficiencia) está en el informe de la entrega.
+
+\textbf{Sobre los nombres.} En este manual, \textit{comprobación por fuerza bruta} es la verificación de la parte 1 que hace \cod{src/comprobar.py}. La palabra \textit{auditoría} se reserva para la segunda parte del Subproyecto~3, la cobertura mínima de auditoría, que no forma parte de esta entrega.
+
+% ======================= 1 =======================
+\section{Qué resuelve}
+\label{sec:que}
+
+Una cadena tiene $n$ etapas en serie. La etapa $i$ dura $t_i$; acelerarla cuesta $c_i$ y le quita $d_i$ unidades de tiempo, con $0\le d_i\le t_i$. Con un presupuesto entero $B$, el programa elige qué etapas acelerar para que la cadena dure lo menos posible.
+
+Como la duración sin acelerar, $\sum t_i$, es fija, el programa maximiza la reducción $\sum d_i$ de las etapas elegidas, con la condición de que $\sum c_i\le B$. Es una mochila 0/1: el costo hace de peso y la reducción hace de valor.
+
+% ======================= 2 =======================
+\section{Requisitos e instalación}
+
+\begin{itemize}
+  \item Python 3.10 o superior. Se probó con Python 3.12.10 en Windows 11.
+  \item No usa librerías externas, así que no hay que instalar dependencias.
+\end{itemize}
+
+\begin{lstlisting}
+git clone https://github.com/Mandara2/ProyectoADAG3.git
+cd ProyectoADAG3
+\end{lstlisting}
+
+Todos los comandos de este manual se ejecutan desde la raíz del repositorio.
+
+% ======================= 3 =======================
+\section{Ejecución}
+\label{sec:ejecucion}
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}Xl@{}}
+\encabezado \blanco{Qué se quiere} & \blanco{Comando} \\
+Correr un solo caso, con su detalle completo & \cod{python src/main.py ruta/al/caso.json} \\
+Correr todos los casos de una carpeta & \cod{python src/main.py pruebas/casos} \\
+Lo mismo, con el detalle completo de cada caso & \cod{python src/main.py pruebas/casos -{}-detalle} \\
+Elegir dónde guardar las salidas & \cod{python src/main.py pruebas/casos otra\_carpeta} \\
+Comprobar un caso o una carpeta por fuerza bruta & \cod{python src/comprobar.py pruebas/casos} \\
+Correr las pruebas automáticas & \cod{python -m unittest discover -s pruebas} \\
+Generar un caso aleatorio & \cod{python src/generar\_casos.py <n> <semilla> [carpeta]} \\
+\bottomrule
+\end{tabularx}
+\caption{Comandos del programa.}
+\end{table}
+
+Por defecto las salidas se guardan en \cod{resultados/}. Por cada caso, el programa imprime una línea en pantalla:
+
+\begin{lstlisting}
+ejemplo_tres_etapas: acelerar [1, 3], costo 9/10, duración 22 -> 15, 0.007 ms
+\end{lstlisting}
+
+Con un solo archivo, o con \cod{-{}-detalle}, después de esa línea se imprime el detalle del caso en cuatro bloques separados (Tabla~\ref{tab:bloques}).
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\encabezado \blanco{Bloque} & \blanco{Qué muestra} \\
+\cod{[1] DATOS DEL CASO} & $n$, $B$, la duración sin acelerar y $t$, $c$, $d$ de cada etapa. \\
+\cod{[2] PROGRAMACIÓN DINÁMICA} & La tabla DP con el camino de la reconstrucción entre corchetes, la reconstrucción paso a paso y el resultado (sección~\ref{sub:tabla}). \\
+\cod{[3] COMPROBACIÓN POR FUERZA BRUTA} & Cada combinación revisada, sin usar la DP, y las soluciones óptimas (sección~\ref{sub:comprobar}). \\
+\cod{[4] VEREDICTO} & \cod{COINCIDE}, \cod{NO COINCIDE} o \cod{SIN COMPROBAR} (si el caso tiene más de 20 etapas). \\
+\bottomrule
+\end{tabularx}
+\caption{Los cuatro bloques del detalle de un caso.}
+\label{tab:bloques}
+\end{table}
+
+Los bloques 3 y 4 también se guardan en \cod{resultados/comprobacion/<id>.log}, y el resumen incluye el campo \cod{coincide\_con\_fuerza\_bruta}.
+
+Si un caso es inválido, el programa lo reporta y sigue con los demás:
+
+\begin{lstlisting}
+roto.json: INVÁLIDO, en la etapa 1 no se cumple d <= t (3 > 2)
+\end{lstlisting}
+
+% ======================= 4 =======================
+\section{Formato de entrada}
+\label{sec:entrada}
+
+Cada caso es un archivo \cod{.json}:
+
+\begin{lstlisting}
+{
+  "id": "ejemplo_tres_etapas",
+  "B": 10,
+  "etapas": [
+    { "t": 8, "c": 4, "d": 3 },
+    { "t": 5, "c": 3, "d": 2 },
+    { "t": 9, "c": 5, "d": 4 }
+  ]
+}
+\end{lstlisting}
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}llX@{}}
+\encabezado \blanco{Campo} & \blanco{Tipo} & \blanco{Significado} \\
+\cod{id} & texto & Nombre del caso. También es el nombre del archivo de salida. \\
+\cod{B} & entero $\ge 0$ & Presupuesto total. \\
+\cod{etapas} & lista & Una entrada por etapa, en el orden de la cadena. \\
+\cod{t} & entero $\ge 0$ & Duración normal de la etapa. \\
+\cod{c} & entero $\ge 0$ & Costo de acelerarla. \\
+\cod{d} & entero, $0\le d\le t$ & Tiempo que se reduce si se acelera. \\
+\cod{esperado} & opcional & Respuesta conocida. Solo la usan las pruebas automáticas; el programa la ignora. \\
+\bottomrule
+\end{tabularx}
+\caption{Campos de un caso.}
+\end{table}
+
+Las etapas se numeran desde 1 según su posición en la lista. Un caso se rechaza si:
+\begin{itemize}
+  \item No es JSON válido.
+  \item Le falta \cod{id}, \cod{B} o \cod{etapas}.
+  \item \cod{etapas} no es una lista, o una etapa no tiene \cod{t}, \cod{c} y \cod{d}.
+  \item Algún número no es un entero mayor o igual a 0.
+  \item En alguna etapa $d > t$.
+\end{itemize}
+
+\textbf{Sobre el caso del monitor.} El monitor compartió un caso de referencia, el archivo \cod{entrada\_G3\_mochila\_20\_nodos.json} de la carpeta \cod{casos/}, en otro formato: trae, además de los datos de aceleración, datos de auditoría y de variantes de entregas posteriores. Como esta entrega cubre solo la aceleración, el programa usa el formato de esta sección y no lee ese archivo; si se le pasa, lo reporta como inválido.
+
+% ======================= 5 =======================
+\section{Formato de salida}
+\label{sec:salida}
+
+Por cada caso se crea \cod{resultados/<id>.json} con los campos de la Tabla~\ref{tab:salida}.
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\encabezado \blanco{Campo} & \blanco{Significado} \\
+\cod{id}, \cod{n} & Nombre del caso y número de etapas. \\
+\cod{tiempo\_ms} & Tiempo promedio de 5 ejecuciones del algoritmo, en milisegundos. No incluye la lectura del archivo. \\
+\cod{etapas\_aceleradas} & Etapas elegidas, en orden. \\
+\cod{costo\_usado}, \cod{presupuesto} & Lo que se gastó y lo que había. \\
+\cod{reduccion} & Tiempo total quitado: $\DP{n}{B}$. \\
+\cod{duracion\_original}, \cod{duracion\_final} & Duración antes y después de acelerar. \\
+\cod{traza.casillas\_tabla} & Tamaño de la tabla: $(n+1)(B+1)$. \\
+\cod{traza.reconstruccion} & Una fila por etapa, de la última a la primera: \cod{etapa}, \cod{b}, \cod{DP[i][b]}, \cod{DP[i-1][b]}, \cod{decision} y \cod{presupuesto\_restante}. \\
+\cod{traza.tabla} & La tabla DP completa. Solo aparece si tiene menos de 500 casillas. \\
+\bottomrule
+\end{tabularx}
+\caption{Campos de \cod{resultados/<id>.json}.}
+\label{tab:salida}
+\end{table}
+
+Además se crea \cod{resultados/resumen.json}, con una fila por caso. Cuando se corre con detalle (un solo archivo o \cod{-{}-detalle}), cada fila incluye \cod{coincide\_con\_fuerza\_bruta}: \cod{true}, \cod{false} o \cod{null} si el caso es demasiado grande para comprobarlo. Al correr un solo archivo, \cod{resumen.json} queda solo con ese caso; para tenerlo completo hay que correr la carpeta.
+
+Con detalle también se crea \cod{resultados/comprobacion/<id>.log}, con el registro de la comprobación por fuerza bruta (sección~\ref{sub:comprobar}).
+
+\textbf{Relación con la guía de la primera entrega.} Para el G3, la guía pide entregar, por cada caso, el resultado, el tiempo y una traza con los estados y decisiones de la programación dinámica, las etapas aceleradas y los costos. La Tabla~\ref{tab:guia} muestra qué campo cubre cada punto.
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\encabezado \blanco{Lo que pide la guía} & \blanco{Campo de la salida} \\
+Resultado & \cod{etapas\_aceleradas}, \cod{reduccion}, \cod{duracion\_original}, \cod{duracion\_final} \\
+Tiempo por caso & \cod{tiempo\_ms} \\
+Estados y decisiones de la DP & \cod{traza.reconstruccion} y, si es pequeña, \cod{traza.tabla} \\
+Etapas aceleradas & \cod{etapas\_aceleradas} \\
+Costos & \cod{costo\_usado} y \cod{presupuesto} \\
+Traza identificada por caso & El archivo se llama igual que el \cod{id} del caso \\
+\bottomrule
+\end{tabularx}
+\caption{Requisitos de la guía y campos que los cubren.}
+\label{tab:guia}
+\end{table}
+
+La cobertura de auditoría que menciona la guía no aplica, porque esta entrega cubre solo el primer problema del Subproyecto~3. La sección~6 del informe muestra la traza del caso \cod{ejemplo\_tres\_etapas} e indica dónde está la de cada caso.
+
+% ======================= 6 =======================
+\section{Estructura del código}
+\label{sec:estructura}
+
+\begin{lstlisting}
+src/
+|-- lectura.py         lee y valida los casos
+|-- aceleracion.py     algoritmo: tabla, reconstrucción y traza
+|-- main.py            corre los casos, mide el tiempo y escribe las salidas
+|-- tabla.py           dibuja en la terminal la tabla DP y la reconstrucción
+|-- comprobar.py       comprueba por fuerza bruta y compara con la DP
+`-- generar_casos.py   crea casos aleatorios reproducibles
+pruebas/
+|-- test_aceleracion.py
+`-- casos/             casos propios, con respuesta esperada cuando n <= 16
+resultados/
+|-- <id>.json          resultado, tiempo y traza de cada caso
+|-- resumen.json       una fila por caso
+`-- comprobacion/      registro de la comprobación por fuerza bruta de cada caso
+casos/                 caso de referencia del monitor (otro formato; ver sección 4)
+docs/
+|-- manual_tecnico.tex este manual, en LaTeX
+|-- MANUAL_TECNICO.md  versión en Markdown, para leerla en GitHub
+`-- MANUAL_TECNICO.pdf versión en PDF
+informe/
+`-- informe.tex        informe de la entrega
+\end{lstlisting}
+
+\subsection{\cod{lectura.py}}
+
+Es el único archivo que conoce el formato de entrada. Si los casos llegan en otro formato, solo cambia este archivo.
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\encabezado \blanco{Función} & \blanco{Qué hace} \\
+\cod{validar\_caso(datos)} & Revisa un caso ya cargado y devuelve \cod{(id, B, etapas)}. Lanza \cod{CasoInvalido} con un mensaje claro si algo falla. \\
+\cod{leer\_caso(ruta)} & Abre el archivo, lo convierte de JSON y llama a \cod{validar\_caso}. \\
+\cod{listar\_casos(ruta)} & Si \cod{ruta} es un archivo, devuelve solo ese; si es una carpeta, devuelve sus \cod{.json} en orden alfabético. \\
+\bottomrule
+\end{tabularx}
+\caption{Funciones de \cod{lectura.py}.}
+\end{table}
+
+\subsection{\cod{aceleracion.py}}
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}lXl@{}}
+\encabezado \blanco{Función} & \blanco{Qué hace} & \blanco{Costo} \\
+\cod{llenar\_tabla(etapas, B)} & Construye la tabla DP de $(n+1)\times(B+1)$. & $O(n\cdot B)$ \\
+\cod{reconstruir(dp, etapas, B)} & Recorre la tabla hacia atrás y decide qué etapas se aceleraron. & $O(n)$ \\
+\cod{resolver(etapas, B)} & Llama a las dos anteriores y arma el resultado con su traza. & $O(n\cdot B)$ \\
+\bottomrule
+\end{tabularx}
+\caption{Funciones de \cod{aceleracion.py}.}
+\end{table}
+
+\subsection{\cod{main.py}}
+
+\begin{enumerate}
+  \item Recibe un archivo o una carpeta.
+  \item Para cada caso: lo lee con \cod{leer\_caso}, ejecuta \cod{resolver} 5 veces midiendo con \cod{time.perf\_counter()} y promedia el tiempo.
+  \item Escribe \cod{resultados/<id>.json} e imprime la línea resumen.
+  \item Si es un solo archivo o se pidió \cod{-{}-detalle}, imprime los cuatro bloques con \cod{tabla.py} y las funciones de \cod{comprobar.py}, y guarda el registro de la comprobación.
+  \item Al final escribe \cod{resultados/resumen.json}.
+\end{enumerate}
+
+\subsection{\cod{tabla.py}}
+\label{sub:tabla}
+
+Dibuja en la terminal lo que hizo la DP con un caso: es el bloque 2 del detalle.
+\begin{itemize}
+  \item \textbf{La tabla DP}, con una fila por etapa (etiquetada con su $c$ y su $d$) y una columna por presupuesto $b$. Las casillas por las que pasa la reconstrucción van entre corchetes. Solo se dibuja si tiene hasta 31 columnas ($B\le 30$) y menos de 500 casillas; si no, se avisa y se omite.
+  \item \textbf{La reconstrucción}, de la última etapa a la primera, con la decisión de cada paso.
+  \item \textbf{El resultado}, en una línea.
+\end{itemize}
+
+\begin{lstlisting}
+Etapas \ b   |  0   1   2   3   4   5   6   7   8   9  10
+----------------------------------------------------------
+0 ninguna    |  0  [0]  0   0   0   0   0   0   0   0   0
+1 (c=4, d=3) |  0   0   0   0   3  [3]  3   3   3   3   3
+2 (c=3, d=2) |  0   0   0   2   3  [3]  3   5   5   5   5
+3 (c=5, d=4) |  0   0   0   2   3   4   4   5   6   7  [7]
+\end{lstlisting}
+
+\subsection{\cod{comprobar.py}}
+\label{sub:comprobar}
+
+Comprueba la DP de forma independiente: busca el óptimo sin usar la tabla, probando todas las combinaciones.
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\encabezado \blanco{Función} & \blanco{Qué hace} \\
+\cod{escribir\_datos(B, etapas, escribir)} & Escribe los datos del caso (bloque 1 del detalle). \\
+\cod{fuerza\_bruta(etapas, B, escribir)} & Prueba los $2^n$ subconjuntos y registra cada uno. Devuelve la reducción máxima y todas las soluciones óptimas. \\
+\cod{comprobar(etapas, B, escribir)} & Llama a \cod{fuerza\_bruta} y escribe el óptimo (bloque 3). Devuelve \cod{None} si el caso tiene más de 20 etapas. \\
+\cod{veredicto(dp, fuerza, escribir)} & Compara la DP con la fuerza bruta y escribe \cod{COINCIDE}, \cod{NO COINCIDE} o \cod{SIN COMPROBAR} (bloque 4). \\
+\cod{comprobar\_caso(id, B, etapas, escribir)} & Hace todo lo anterior para un caso; es lo que usa el comando \cod{python src/comprobar.py}. \\
+\bottomrule
+\end{tabularx}
+\caption{Funciones de \cod{comprobar.py}.}
+\end{table}
+
+Para cada caso de hasta 20 etapas prueba los $2^n$ subconjuntos en orden de tamaño. De cada uno registra:
+\begin{itemize}
+  \item Qué etapas se aceleran y cuánto cuesta.
+  \item Si cabe en el presupuesto. Si no cabe, lo anota y no lo evalúa.
+  \item La reducción y la duración resultantes.
+  \item Si es un nuevo mejor o empata con el mejor.
+\end{itemize}
+
+Al final lista todas las soluciones óptimas, corre la DP y escribe \cod{COINCIDE} si la DP eligió una de ellas, o \cod{NO COINCIDE} si no. El registro se imprime y se guarda en \cod{resultados/comprobacion/<id>.log}. Con más de 1\,024 combinaciones (más de 10 etapas) solo se escriben las que mejoran el resultado, para que el archivo no sea enorme. Termina con código 1 si algún caso no coincide.
+
+Fragmento del registro de \cod{ejemplo\_tres\_etapas}:
+
+\begin{lstlisting}
+    #  Etapas aceleradas       Costo  Cabe Reducción Duración  Nota
+    6  {1, 3}                      9  sí           7       15  nuevo mejor
+    7  {2, 3}                      8  sí           6       16
+    8  {1, 2, 3}                  12  no           -        -  no cabe: 12 > 10
+
+Programación dinámica: acelera {1, 3}, reducción 7, costo 9.
+Resultado: COINCIDE. La DP encontró una de las soluciones óptimas.
+\end{lstlisting}
+
+\subsection{\cod{generar\_casos.py}}
+
+Crea un caso aleatorio a partir de $n$ y una semilla. La misma semilla siempre produce el mismo caso. Cada etapa tiene $t$ entre 1 y 20, $d$ entre 0 y $t$, y $c$ entre 1 y 15. El presupuesto es la mitad de la suma de los costos, para que no todas las etapas quepan.
+
+% ======================= 7 =======================
+\section{El algoritmo, paso a paso}
+\label{sec:algoritmo}
+
+$\DP{i}{b}$ es la mayor reducción que se puede lograr usando solo las primeras $i$ etapas y gastando como máximo $b$:
+\begin{equation*}
+  \DP{i}{b}=
+  \begin{cases}
+    \max\bigl(\DP{i-1}{b},\ \DP{i-1}{b-c_i}+d_i\bigr) & \text{si } c_i\le b,\\
+    \DP{i-1}{b} & \text{si } c_i>b,
+  \end{cases}
+  \qquad \DP{0}{b}=0.
+\end{equation*}
+La respuesta es $\DP{n}{B}$.
+
+\textbf{Reconstrucción.} Se empieza en $i=n$, $b=B$. Si $\DP{i}{b}\ne\DP{i-1}{b}$, la etapa $i$ se usó: se acelera y $b$ baja en $c_i$. Si son iguales, no se aceleró. Luego se pasa a $i-1$.
+
+\textbf{Ejemplo} (\cod{ejemplo\_tres\_etapas}, con $B=10$ y etapas $(t,c,d)$: $(8,4,3)$, $(5,3,2)$ y $(9,5,4)$):
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{cccccc}
+\encabezado \blanco{Etapa} & \blanco{$b$} & \blanco{$\DP{i}{b}$} & \blanco{$\DP{i-1}{b}$} & \blanco{Decisión} & \blanco{Presupuesto restante} \\
+3 & 10 & 7 & 5 & acelerar & 5 \\
+2 & 5 & 3 & 3 & no acelerar & 5 \\
+1 & 5 & 3 & 0 & acelerar & 1 \\
+\bottomrule
+\end{tabular}
+\caption{Reconstrucción del caso \cod{ejemplo\_tres\_etapas}.}
+\end{table}
+
+Se aceleran las etapas 1 y 3, con costo 9. La reducción es 7 y la duración pasa de 22 a 15.
+
+\textbf{Por qué no hace falta guardar las decisiones.} La comparación al llenar la tabla es estricta ($>$): si acelerar empata con no acelerar, se queda el valor de no acelerar. Por eso $\DP{i}{b}\ne\DP{i-1}{b}$ ocurre exactamente cuando la etapa $i$ se aceleró, y la reconstrucción no necesita una segunda tabla.
+
+\textbf{Memoria.} La tabla completa ocupa $O(n\cdot B)$ enteros, y la reconstrucción la necesita entera. Una variante que solo guarda dos filas de valores y un bit por casilla con la decisión reduciría la memoria sin cambiar el orden $O(n\cdot B)$; queda para la entrega de experimentación.
+
+% ======================= 8 =======================
+\section{Casos de prueba propios}
+\label{sec:casos}
+
+Están en \cod{pruebas/casos/}. La respuesta esperada se calculó por fuerza bruta, probando todos los subconjuntos, sin usar la DP.
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}lXr@{}}
+\encabezado \blanco{Caso} & \blanco{Qué prueba} & \blanco{Reducción esperada} \\
+\cod{ejemplo\_tres\_etapas} & Caso básico con traza conocida & 7 \\
+\cod{ejemplo\_almuerzo} & El presupuesto se usa completo & 22 \\
+\cod{voraz\_por\_razon\_falla} & Elegir por la mejor razón $d/c$ daría 160; el óptimo es 220 & 220 \\
+\cod{borde\_presupuesto\_cero} & $B=0$ & 0 \\
+\cod{borde\_costo\_cero} & Una etapa con costo 0 se acelera sin gastar & 2 \\
+\cod{borde\_nada\_cabe} & Ninguna etapa cabe en el presupuesto & 0 \\
+\cod{borde\_todo\_cabe} & Todas caben & 11 \\
+\cod{borde\_sin\_reduccion} & Una etapa con $d=0$ & 4 \\
+\cod{aleatorio\_n15\_s7} & Caso generado con 15 etapas & 87 \\
+\cod{aleatorio\_n200\_s1} & Caso grande: 200 etapas, $B=824$ & --- \\
+\bottomrule
+\end{tabularx}
+\caption{Casos de prueba propios. El de 200 etapas no tiene respuesta esperada: sirve para medir el tiempo.}
+\end{table}
+
+% ======================= 9 =======================
+\section{Pruebas automáticas}
+\label{sec:pruebas}
+
+\cod{python -m unittest discover -s pruebas} corre 19 pruebas:
+\begin{itemize}
+  \item Los ejemplos con resultado y traza conocidos.
+  \item Los casos borde.
+  \item Todos los casos de \cod{pruebas/casos}, comparados con su campo \cod{esperado}.
+  \item 300 casos aleatorios con semilla fija, comparados contra fuerza bruta.
+  \item La validación: $d>t$, presupuesto no entero, \cod{etapas} que no es lista y JSON mal escrito.
+  \item La comprobación por fuerza bruta: coincide con la DP en los casos propios, registra las 8 combinaciones del ejemplo y no intenta comprobar casos de más de 20 etapas.
+  \item La vista de la tabla: marca con corchetes el camino de la reconstrucción y no dibuja tablas de más de 31 columnas.
+\end{itemize}
+
+% ======================= 10 =======================
+\section{Resultados verificados}
+\label{sec:verificados}
+
+Estos son los resultados de la versión entregada. Se obtienen con \cod{python src/main.py pruebas/casos -{}-detalle}, y cada uno se verificó de tres formas: contra su respuesta esperada, contra la comprobación por fuerza bruta del programa y contra una fuerza bruta escrita aparte.
+
+\begin{table}[H]
+\centering\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}lrrrrX@{}}
+\encabezado \blanco{Caso} & \blanco{$n$} & \blanco{$B$} & \blanco{Reducción} & \blanco{Esperada} & \blanco{Comprobación por fuerza bruta} \\
+\cod{ejemplo\_tres\_etapas} & 3 & 10 & 7 & 7 & \cod{COINCIDE} \\
+\cod{ejemplo\_almuerzo} & 3 & 5 & 22 & 22 & \cod{COINCIDE} \\
+\cod{voraz\_por\_razon\_falla} & 3 & 50 & 220 & 220 & \cod{COINCIDE} \\
+\cod{borde\_presupuesto\_cero} & 2 & 0 & 0 & 0 & \cod{COINCIDE} \\
+\cod{borde\_costo\_cero} & 2 & 0 & 2 & 2 & \cod{COINCIDE} \\
+\cod{borde\_nada\_cabe} & 2 & 2 & 0 & 0 & \cod{COINCIDE} \\
+\cod{borde\_todo\_cabe} & 3 & 100 & 11 & 11 & \cod{COINCIDE} \\
+\cod{borde\_sin\_reduccion} & 2 & 5 & 4 & 4 & \cod{COINCIDE} (hay 2 soluciones óptimas) \\
+\cod{aleatorio\_n15\_s7} & 15 & 33 & 87 & 87 & \cod{COINCIDE} (32\,768 combinaciones) \\
+\cod{aleatorio\_n200\_s1} & 200 & 824 & 942 & --- & \cod{SIN COMPROBAR} ($2^{200}$ combinaciones) \\
+\bottomrule
+\end{tabularx}
+\caption{Resultados de la versión entregada.}
+\end{table}
+
+El caso de 200 etapas no se puede comprobar por fuerza bruta. Su resultado se verificó con una programación dinámica distinta, de una sola fila, que también da 942.
+
+Para repetir la verificación:
+
+\begin{lstlisting}
+python -m unittest discover -s pruebas
+python src/main.py pruebas/casos --detalle
+\end{lstlisting}
+
+El primer comando debe terminar con \cod{Ran 19 tests} y \cod{OK}. El segundo debe mostrar 9 veces \cod{Resultado: COINCIDE} y 1 vez \cod{Resultado: SIN COMPROBAR}.
+
+% ======================= 11 =======================
+\section{Limitaciones}
+\label{sec:limitaciones}
+
+\begin{itemize}
+  \item \textbf{Pseudo-polinomial:} el tiempo y la memoria crecen con el valor de $B$. Con un $B$ de millones, la tabla tiene millones de casillas por etapa y puede no caber en memoria.
+  \item Solo acepta valores enteros. Un $B$ con decimales se rechaza.
+  \item Si hay varias soluciones óptimas, devuelve una sola. Por cómo funciona la reconstrucción, cuando hay empate prefiere no acelerar la etapa de número mayor.
+  \item La tabla completa solo se guarda en la traza si tiene menos de 500 casillas, para que los archivos de salida no sean enormes.
+  \item La comprobación por fuerza bruta solo alcanza casos de hasta 20 etapas.
+  \item No lee el formato del caso de referencia del monitor (sección~\ref{sec:entrada}).
+  \item No incluye la segunda parte del Subproyecto~3, la cobertura mínima de auditoría, por indicación del curso.
+\end{itemize}
+
+\end{document}
