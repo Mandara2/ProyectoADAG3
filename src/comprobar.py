@@ -1,6 +1,6 @@
-"""Auditoría por fuerza bruta: revisa todas las combinaciones de etapas.
+"""Comprobación por fuerza bruta: revisa todas las combinaciones de etapas.
 
-Uso: python src/auditar.py <archivo.json | carpeta> [carpeta_de_salida]
+Uso: python src/comprobar.py <archivo.json | carpeta> [carpeta_de_salida]
 
 Para cada caso prueba los 2^n subconjuntos de etapas, deja un registro de cada
 uno (costo, si cabe, reducción, duración y si mejora lo anterior) y al final
@@ -8,7 +8,7 @@ compara el óptimo encontrado con el de la programación dinámica. Es
 independiente de la DP, así que sirve para comprobar que la DP no se equivoca.
 
 El registro se imprime en pantalla y se guarda en
-<carpeta_de_salida>/<id>.log (por defecto resultados/auditoria/).
+<carpeta_de_salida>/<id>.log (por defecto resultados/comprobacion/).
 """
 
 import sys
@@ -89,7 +89,7 @@ def comprobar(etapas, presupuesto, escribir):
     """
     n = len(etapas)
     if n > MAX_ETAPAS:
-        escribir(f"No se audita: con n = {n} habría 2^{n} combinaciones (el límite es n = {MAX_ETAPAS}).")
+        escribir(f"No se comprueba: con n = {n} habría 2^{n} combinaciones (el límite es n = {MAX_ETAPAS}).")
         return None
 
     duracion_original = sum(etapa["t"] for etapa in etapas)
@@ -116,9 +116,9 @@ def veredicto(dp, fuerza, escribir):
     return coincide
 
 
-def auditar_caso(id_caso, presupuesto, etapas, escribir):
-    """Audita un caso y devuelve True si la DP coincide con la fuerza bruta."""
-    escribir(f"=== Auditoría por fuerza bruta: {id_caso} ===")
+def comprobar_caso(id_caso, presupuesto, etapas, escribir):
+    """Comprueba un caso y devuelve True si la DP coincide con la fuerza bruta."""
+    escribir(f"=== Comprobación por fuerza bruta: {id_caso} ===")
     escribir_datos(presupuesto, etapas, escribir)
     escribir("")
     fuerza = comprobar(etapas, presupuesto, escribir)
@@ -129,11 +129,11 @@ def auditar_caso(id_caso, presupuesto, etapas, escribir):
 
 def main():
     if len(sys.argv) < 2:
-        print("Uso: python src/auditar.py <archivo.json | carpeta> [carpeta_de_salida]")
+        print("Uso: python src/comprobar.py <archivo.json | carpeta> [carpeta_de_salida]")
         return 1
 
     entrada = Path(sys.argv[1])
-    salida = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("resultados/auditoria")
+    salida = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("resultados/comprobacion")
     salida.mkdir(parents=True, exist_ok=True)
 
     casos = listar_casos(entrada)
@@ -155,7 +155,7 @@ def main():
             print(texto)
             lineas.append(texto)
 
-        if auditar_caso(id_caso, presupuesto, etapas, escribir) is False:
+        if comprobar_caso(id_caso, presupuesto, etapas, escribir) is False:
             fallos += 1
         (salida / f"{id_caso}.log").write_text("\n".join(lineas) + "\n", encoding="utf-8")
         print()

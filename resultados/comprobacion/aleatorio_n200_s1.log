@@ -201,7 +201,7 @@ n = 200 etapas, presupuesto B = 824, duración sin acelerar = 2130
   etapa 199: t = 12, c = 3, d = 11
   etapa 200: t = 15, c = 10, d = 2
 
-No se audita: con n = 200 habría 2^200 combinaciones (el límite es n = 20).
+No se comprueba: con n = 200 habría 2^200 combinaciones (el límite es n = 20).
 
 Programación dinámica: acelera {2, 3, 4, 6, 9, 11, 13, 14, 15, 16, 18, 21, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33, 35, 36, 37, 38, 39, 40, 41, 42, 44, 46, 48, 49, 50, 51, 55, 59, 61, 62, 63, 65, 68, 69, 70, 73, 74, 75, 76, 78, 79, 80, 81, 84, 88, 90, 91, 93, 94, 96, 101, 102, 103, 107, 108, 109, 111, 114, 116, 117, 119, 122, 124, 125, 127, 128, 130, 132, 133, 134, 137, 138, 139, 141, 142, 144, 145, 149, 151, 152, 154, 157, 161, 166, 167, 169, 171, 174, 175, 176, 178, 180, 182, 184, 188, 189, 190, 192, 195, 196, 197, 198, 199}, reducción 942, costo 824.
 Resultado: SIN COMPROBAR. El caso es demasiado grande para la fuerza bruta.

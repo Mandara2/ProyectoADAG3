@@ -20,7 +20,7 @@
     ],
     "costo_usado": 29,
     "duracion_final": 69,
-    "tiempo_ms": 0.04501999937929213,
+    "tiempo_ms": 0.042359999497421086,
     "coincide_con_fuerza_bruta": true
   },
   {
@@ -146,7 +146,7 @@
     ],
     "costo_usado": 824,
     "duracion_final": 1188,
-    "tiempo_ms": 12.762800001655705,
+    "tiempo_ms": 12.533179999445565,
     "coincide_con_fuerza_bruta": null
   },
   {
@@ -160,7 +160,7 @@
     ],
     "costo_usado": 0,
     "duracion_final": 7,
-    "tiempo_ms": 0.003479997394606471,
+    "tiempo_ms": 0.0034199998481199145,
     "coincide_con_fuerza_bruta": true
   },
   {
@@ -172,7 +172,7 @@
     "etapas_aceleradas": [],
     "costo_usado": 0,
     "duracion_final": 9,
-    "tiempo_ms": 0.0030399998649954796,
+    "tiempo_ms": 0.0028000009479001164,
     "coincide_con_fuerza_bruta": true
   },
   {
@@ -184,7 +184,7 @@
     "etapas_aceleradas": [],
     "costo_usado": 0,
     "duracion_final": 9,
-    "tiempo_ms": 0.002680000034160912,
+    "tiempo_ms": 0.002579999272711575,
     "coincide_con_fuerza_bruta": true
   },
   {
@@ -229,7 +229,7 @@
     ],
     "costo_usado": 5,
     "duracion_final": 6,
-    "tiempo_ms": 0.004260000423528254,
+    "tiempo_ms": 0.004159999662078917,
     "coincide_con_fuerza_bruta": true
   },
   {
@@ -244,7 +244,7 @@
     ],
     "costo_usado": 9,
     "duracion_final": 15,
-    "tiempo_ms": 0.005060000694356859,
+    "tiempo_ms": 0.004919999628327787,
     "coincide_con_fuerza_bruta": true
   },
   {
@@ -259,7 +259,7 @@
     ],
     "costo_usado": 50,
     "duracion_final": 60,
-    "tiempo_ms": 0.011079999967478216,
+    "tiempo_ms": 0.011580000864341855,
     "coincide_con_fuerza_bruta": true
   }
 ]

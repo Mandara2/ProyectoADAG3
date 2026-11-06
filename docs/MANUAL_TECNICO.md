@@ -1,10 +1,14 @@
 # Manual técnico
 
-**Proyecto:** aceleración de una cadena de etapas bajo presupuesto (Subproyecto 3, primer problema).
-**Curso:** Análisis y Diseño de Algoritmos 2026-B, Universidad de Caldas.
-**Grupo 3:** Rafael Medina e Isabela Guerrero.
+- **Proyecto:** aceleración de una cadena de etapas bajo presupuesto (Subproyecto 3, primer problema).
+- **Curso:** Análisis y Diseño de Algoritmos 2026-B, Universidad de Caldas.
+- **Grupo 3:** Rafael Medina e Isabela Guerrero.
+- **Repositorio:** https://github.com/Mandara2/ProyectoADAG3
+- **Entrega:** viernes 6 de noviembre de 2026.
 
-Este manual explica cómo está construida la solución, cómo se ejecuta, qué formatos usa y cuáles son sus límites.
+Este manual explica cómo está construida la solución, cómo se ejecuta, qué formatos usa, cómo se verificaron sus resultados y cuáles son sus límites.
+
+**Sobre los nombres.** En este manual, *comprobación por fuerza bruta* es la verificación de la parte 1 que hace `src/comprobar.py`. La palabra *auditoría* se reserva para la segunda parte del Subproyecto 3, la cobertura mínima de auditoría, que no forma parte de esta entrega.
 
 ## 1. Qué resuelve
 
@@ -14,7 +18,7 @@ Como la duración sin acelerar, `Σ t_i`, es fija, el programa maximiza la reduc
 
 ## 2. Requisitos e instalación
 
-- Python 3.10 o superior.
+- Python 3.10 o superior. Se probó con Python 3.12.10 en Windows 11.
 - No usa librerías externas, así que no hay que instalar dependencias.
 
 ```bash
@@ -32,7 +36,7 @@ Todos los comandos de este manual se ejecutan desde la raíz del repositorio.
 | Correr todos los casos de una carpeta | `python src/main.py pruebas/casos` |
 | Lo mismo, con el detalle completo de cada caso | `python src/main.py pruebas/casos --detalle` |
 | Elegir dónde guardar las salidas | `python src/main.py pruebas/casos otra_carpeta` |
-| Auditar un caso o una carpeta por fuerza bruta | `python src/auditar.py pruebas/casos` |
+| Comprobar un caso o una carpeta por fuerza bruta | `python src/comprobar.py pruebas/casos` |
 | Correr las pruebas automáticas | `python -m unittest discover -s pruebas` |
 | Generar un caso aleatorio | `python src/generar_casos.py <n> <semilla> [carpeta]` |
 
@@ -51,7 +55,7 @@ Con un solo archivo, o con `--detalle`, después de esa línea se imprime el det
 | `[3] COMPROBACIÓN POR FUERZA BRUTA` | Cada combinación revisada, sin usar la DP, y las soluciones óptimas (sección 6.5) |
 | `[4] VEREDICTO` | `COINCIDE`, `NO COINCIDE` o `SIN COMPROBAR` (si el caso tiene más de 20 etapas) |
 
-Los bloques 3 y 4 también se guardan en `resultados/auditoria/<id>.log`, y el resumen incluye el campo `coincide_con_fuerza_bruta`.
+Los bloques 3 y 4 también se guardan en `resultados/comprobacion/<id>.log`, y el resumen incluye el campo `coincide_con_fuerza_bruta`.
 
 Si un caso es inválido, el programa lo reporta y sigue con los demás:
 
@@ -94,6 +98,8 @@ Un caso se rechaza si:
 - Algún número no es un entero mayor o igual a 0.
 - En alguna etapa `d > t`.
 
+**Sobre el caso del monitor.** El monitor compartió un caso de referencia (`casos/entrada_G3_mochila_20_nodos.json`) en otro formato: trae, además de los datos de aceleración, datos de auditoría y de variantes de entregas posteriores. Como esta entrega cubre solo la aceleración, el programa usa el formato de esta sección y no lee ese archivo; si se le pasa, lo reporta como inválido.
+
 ## 5. Formato de salida
 
 Por cada caso se crea `resultados/<id>.json`:
@@ -110,7 +116,9 @@ Por cada caso se crea `resultados/<id>.json`:
 | `traza.reconstruccion` | Una fila por etapa, de la última a la primera: `etapa`, `b`, `DP[i][b]`, `DP[i-1][b]`, `decision` y `presupuesto_restante` |
 | `traza.tabla` | La tabla DP completa. Solo aparece si tiene menos de 500 casillas. |
 
-Además se crea `resultados/resumen.json`, con una fila por caso.
+Además se crea `resultados/resumen.json`, con una fila por caso. Cuando se corre con detalle (un solo archivo o `--detalle`), cada fila incluye `coincide_con_fuerza_bruta`: `true`, `false` o `null` si el caso es demasiado grande para comprobarlo. Al correr un solo archivo, `resumen.json` queda solo con ese caso; para tenerlo completo hay que correr la carpeta.
+
+Con detalle también se crea `resultados/comprobacion/<id>.log`, con el registro de la comprobación por fuerza bruta (sección 6.5).
 
 **Relación con la guía de la primera entrega.** Para el G3, la guía pide entregar, por cada caso, el resultado, el tiempo y una traza con los estados y decisiones de la programación dinámica, las etapas aceleradas y los costos. Cada `resultados/<id>.json` cubre esos puntos así:
 
@@ -123,7 +131,7 @@ Además se crea `resultados/resumen.json`, con una fila por caso.
 | Costos | `costo_usado` y `presupuesto` |
 | Traza identificada por caso | El archivo se llama igual que el `id` del caso |
 
-La cobertura de auditoría que menciona la guía no aplica, porque esta entrega cubre solo el primer problema del Subproyecto 3. El anexo A del informe muestra la traza de los casos pequeños.
+La cobertura de auditoría que menciona la guía no aplica, porque esta entrega cubre solo el primer problema del Subproyecto 3. La sección 6 del informe muestra la traza del caso `ejemplo_tres_etapas` e indica dónde está la de cada caso.
 
 ## 6. Estructura del código
 
@@ -133,11 +141,21 @@ src/
 ├── aceleracion.py    algoritmo: tabla, reconstrucción y traza
 ├── main.py           corre los casos, mide el tiempo y escribe las salidas
 ├── tabla.py          dibuja en la terminal la tabla DP y la reconstrucción
-├── auditar.py        audita por fuerza bruta y compara con la DP
+├── comprobar.py      comprueba por fuerza bruta y compara con la DP
 └── generar_casos.py  crea casos aleatorios reproducibles
 pruebas/
 ├── test_aceleracion.py
 └── casos/            casos propios, con respuesta esperada cuando n <= 16
+resultados/
+├── <id>.json         resultado, tiempo y traza de cada caso
+├── resumen.json      una fila por caso
+└── comprobacion/     registro de la comprobación por fuerza bruta de cada caso
+casos/                caso de referencia del monitor (otro formato; ver sección 4)
+docs/
+├── MANUAL_TECNICO.md  este manual
+└── MANUAL_TECNICO.pdf
+informe/
+└── informe.tex       informe de la entrega
 ```
 
 ### 6.1 `lectura.py`
@@ -163,7 +181,7 @@ Es el único archivo que conoce el formato de entrada. Si los casos llegan en ot
 1. Recibe un archivo o una carpeta.
 2. Para cada caso: lo lee con `leer_caso`, ejecuta `resolver` 5 veces midiendo con `time.perf_counter()` y promedia el tiempo.
 3. Escribe `resultados/<id>.json` e imprime la línea resumen.
-4. Si es un solo archivo o se pidió `--detalle`, imprime los cuatro bloques con `tabla.py` y las funciones de `auditar.py`, y guarda el registro de la comprobación.
+4. Si es un solo archivo o se pidió `--detalle`, imprime los cuatro bloques con `tabla.py` y las funciones de `comprobar.py`, y guarda el registro de la comprobación.
 5. Al final escribe `resultados/resumen.json`.
 
 ### 6.4 `tabla.py`
@@ -183,16 +201,26 @@ Etapas \ b   |  0   1   2   3   4   5   6   7   8   9  10
 3 (c=5, d=4) |  0   0   0   2   3   4   4   5   6   7  [7]
 ```
 
-### 6.5 `auditar.py`
+### 6.5 `comprobar.py`
 
-Comprueba la DP de forma independiente. Sus funciones `comprobar` y `veredicto` producen los bloques 3 y 4 del detalle de `main.py`, y también se puede correr solo con `python src/auditar.py`. Para cada caso de hasta 20 etapas prueba los `2^n` subconjuntos en orden de tamaño. De cada uno registra:
+Comprueba la DP de forma independiente: busca el óptimo sin usar la tabla, probando todas las combinaciones.
+
+| Función | Qué hace |
+| --- | --- |
+| `escribir_datos(B, etapas, escribir)` | Escribe los datos del caso (bloque 1 del detalle). |
+| `fuerza_bruta(etapas, B, escribir)` | Prueba los `2^n` subconjuntos y registra cada uno. Devuelve la reducción máxima y todas las soluciones óptimas. |
+| `comprobar(etapas, B, escribir)` | Llama a `fuerza_bruta` y escribe el óptimo (bloque 3). Devuelve `None` si el caso tiene más de 20 etapas. |
+| `veredicto(dp, fuerza, escribir)` | Compara la DP con la fuerza bruta y escribe `COINCIDE`, `NO COINCIDE` o `SIN COMPROBAR` (bloque 4). |
+| `comprobar_caso(id, B, etapas, escribir)` | Hace todo lo anterior para un caso; es lo que usa el comando `python src/comprobar.py`. |
+
+Para cada caso de hasta 20 etapas prueba los `2^n` subconjuntos en orden de tamaño. De cada uno registra:
 
 - Qué etapas se aceleran y cuánto cuesta.
 - Si cabe en el presupuesto. Si no cabe, lo anota y no lo evalúa.
 - La reducción y la duración resultantes.
 - Si es un nuevo mejor o empata con el mejor.
 
-Al final lista todas las soluciones óptimas, corre la DP y escribe `COINCIDE` si la DP eligió una de ellas, o `NO COINCIDE` si no. El registro se imprime y se guarda en `resultados/auditoria/<id>.log`. Con más de 1.024 combinaciones (más de 10 etapas) solo se escriben las que mejoran el resultado, para que el archivo no sea enorme. Termina con código 1 si algún caso no coincide.
+Al final lista todas las soluciones óptimas, corre la DP y escribe `COINCIDE` si la DP eligió una de ellas, o `NO COINCIDE` si no. El registro se imprime y se guarda en `resultados/comprobacion/<id>.log`. Con más de 1.024 combinaciones (más de 10 etapas) solo se escriben las que mejoran el resultado, para que el archivo no sea enorme. Termina con código 1 si algún caso no coincide.
 
 Fragmento del registro de `ejemplo_tres_etapas`:
 
@@ -232,6 +260,10 @@ La respuesta es `DP[n][B]`.
 
 Se aceleran las etapas 1 y 3, con costo 9. La reducción es 7 y la duración pasa de 22 a 15.
 
+**Por qué no hace falta guardar las decisiones.** La comparación al llenar la tabla es estricta (`>`): si acelerar empata con no acelerar, se queda el valor de no acelerar. Por eso `DP[i][b] != DP[i-1][b]` ocurre exactamente cuando la etapa `i` se aceleró, y la reconstrucción no necesita una segunda tabla.
+
+**Memoria.** La tabla completa ocupa `O(n·B)` enteros, y la reconstrucción la necesita entera. Una variante que solo guarda dos filas de valores y un bit por casilla con la decisión reduciría la memoria sin cambiar el orden `O(n·B)`; queda para la entrega de experimentación.
+
 ## 8. Casos de prueba propios
 
 Están en `pruebas/casos/`. La respuesta esperada se calculó por fuerza bruta, probando todos los subconjuntos, sin usar la DP.
@@ -258,12 +290,43 @@ Están en `pruebas/casos/`. La respuesta esperada se calculó por fuerza bruta, 
 - Todos los casos de `pruebas/casos`, comparados con su campo `esperado`.
 - 300 casos aleatorios con semilla fija, comparados contra fuerza bruta.
 - La validación: `d > t`, presupuesto no entero, `etapas` que no es lista y JSON mal escrito.
-- El auditor: coincide con la DP en los casos propios, registra las 8 combinaciones del ejemplo y no intenta auditar casos de más de 20 etapas.
+- La comprobación por fuerza bruta: coincide con la DP en los casos propios, registra las 8 combinaciones del ejemplo y no intenta comprobar casos de más de 20 etapas.
+- La vista de la tabla: marca con corchetes el camino de la reconstrucción y no dibuja tablas de más de 31 columnas.
 
-## 10. Limitaciones
+## 10. Resultados verificados
+
+Estos son los resultados de la versión entregada. Se obtienen con `python src/main.py pruebas/casos --detalle`, y cada uno se verificó de tres formas: contra su respuesta esperada, contra la comprobación por fuerza bruta del programa y contra una fuerza bruta escrita aparte.
+
+| Caso | n | B | Reducción | Esperada | Comprobación por fuerza bruta |
+| --- | --- | --- | --- | --- | --- |
+| `ejemplo_tres_etapas` | 3 | 10 | 7 | 7 | COINCIDE |
+| `ejemplo_almuerzo` | 3 | 5 | 22 | 22 | COINCIDE |
+| `voraz_por_razon_falla` | 3 | 50 | 220 | 220 | COINCIDE |
+| `borde_presupuesto_cero` | 2 | 0 | 0 | 0 | COINCIDE |
+| `borde_costo_cero` | 2 | 0 | 2 | 2 | COINCIDE |
+| `borde_nada_cabe` | 2 | 2 | 0 | 0 | COINCIDE |
+| `borde_todo_cabe` | 3 | 100 | 11 | 11 | COINCIDE |
+| `borde_sin_reduccion` | 2 | 5 | 4 | 4 | COINCIDE (hay 2 soluciones óptimas) |
+| `aleatorio_n15_s7` | 15 | 33 | 87 | 87 | COINCIDE (32.768 combinaciones) |
+| `aleatorio_n200_s1` | 200 | 824 | 942 | — | SIN COMPROBAR (`2^200` combinaciones) |
+
+El caso de 200 etapas no se puede comprobar por fuerza bruta. Su resultado se verificó con una programación dinámica distinta, de una sola fila, que también da 942.
+
+Para repetir la verificación:
+
+```bash
+python -m unittest discover -s pruebas
+python src/main.py pruebas/casos --detalle
+```
+
+El primer comando debe terminar con `Ran 19 tests` y `OK`. El segundo debe mostrar 9 veces `Resultado: COINCIDE` y 1 vez `Resultado: SIN COMPROBAR`.
+
+## 11. Limitaciones
 
 - **Pseudo-polinomial:** el tiempo y la memoria crecen con el valor de `B`. Con un `B` de millones, la tabla tiene millones de casillas por etapa y puede no caber en memoria.
 - Solo acepta valores enteros. Un `B` con decimales se rechaza.
 - Si hay varias soluciones óptimas, devuelve una sola. Por cómo funciona la reconstrucción, cuando hay empate prefiere no acelerar la etapa de número mayor.
 - La tabla completa solo se guarda en la traza si tiene menos de 500 casillas, para que los archivos de salida no sean enormes.
-- No incluye la parte de auditoría del Subproyecto 3, por indicación del curso.
+- La comprobación por fuerza bruta solo alcanza casos de hasta 20 etapas.
+- No lee el formato del caso de referencia del monitor (sección 4).
+- No incluye la segunda parte del Subproyecto 3, la cobertura mínima de auditoría, por indicación del curso.

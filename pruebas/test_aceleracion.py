@@ -109,35 +109,35 @@ class CasosPropios(unittest.TestCase):
         self.assertEqual(listar_casos(ruta), [ruta])
 
 
-class Auditor(unittest.TestCase):
-    """El auditor por fuerza bruta coincide con la DP y registra cada combinación."""
+class ComprobacionPorFuerzaBruta(unittest.TestCase):
+    """La comprobación por fuerza bruta coincide con la DP y registra cada combinación."""
 
     def test_coincide_en_casos_propios(self):
-        from auditar import MAX_ETAPAS, auditar_caso
+        from comprobar import MAX_ETAPAS, comprobar_caso
 
         for ruta in listar_casos(CARPETA_CASOS):
             id_caso, presupuesto, lista = leer_caso(ruta)
             if len(lista) > MAX_ETAPAS:
                 continue
             with self.subTest(caso=ruta.name):
-                self.assertTrue(auditar_caso(id_caso, presupuesto, lista, lambda _: None))
+                self.assertTrue(comprobar_caso(id_caso, presupuesto, lista, lambda _: None))
 
     def test_registra_las_ocho_combinaciones(self):
-        from auditar import auditar_caso
+        from comprobar import comprobar_caso
 
         lineas = []
-        auditar_caso("x", 10, etapas((8, 4, 3), (5, 3, 2), (9, 5, 4)), lineas.append)
+        comprobar_caso("x", 10, etapas((8, 4, 3), (5, 3, 2), (9, 5, 4)), lineas.append)
         filas = [l for l in lineas if l[:5].strip().isdigit()]
         self.assertEqual(len(filas), 8)
         self.assertIn("COINCIDE", lineas[-1])
         self.assertTrue(any("{1, 3}" in l and "nuevo mejor" in l for l in filas))
         self.assertTrue(any("{1, 2, 3}" in l and "no cabe" in l for l in filas))
 
-    def test_no_audita_casos_grandes(self):
-        from auditar import MAX_ETAPAS, auditar_caso
+    def test_no_comprueba_casos_grandes(self):
+        from comprobar import MAX_ETAPAS, comprobar_caso
 
         grande = etapas(*[(2, 1, 1)] * (MAX_ETAPAS + 1))
-        self.assertIsNone(auditar_caso("grande", 5, grande, lambda _: None))
+        self.assertIsNone(comprobar_caso("grande", 5, grande, lambda _: None))
 
 
 class VistaDeTabla(unittest.TestCase):

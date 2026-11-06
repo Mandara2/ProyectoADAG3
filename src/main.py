@@ -14,7 +14,7 @@ import time
 from pathlib import Path
 
 from aceleracion import resolver
-from auditar import comprobar, escribir_datos, veredicto
+from comprobar import comprobar, escribir_datos, veredicto
 from lectura import CasoInvalido, leer_caso, listar_casos
 from tabla import formatear
 
@@ -56,7 +56,7 @@ def mostrar_detalle(id_caso, presupuesto, etapas, resultado, salida):
     print("=" * ANCHO)
     print()
 
-    carpeta = salida / "auditoria"
+    carpeta = salida / "comprobacion"
     carpeta.mkdir(parents=True, exist_ok=True)
     (carpeta / f"{id_caso}.log").write_text("\n".join(registro) + "\n", encoding="utf-8")
     return coincide
