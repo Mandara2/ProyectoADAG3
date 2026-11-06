@@ -75,10 +75,29 @@ Correr un solo caso:
 python src/main.py pruebas/casos/ejemplo_tres_etapas.json
 ```
 
+Con un solo archivo, la terminal muestra además el detalle del caso en cuatro bloques separados:
+
+1. **Datos del caso.**
+2. **Programación dinámica:** la tabla DP, con las casillas de la reconstrucción entre corchetes, y la reconstrucción paso a paso. La tabla se dibuja si tiene hasta 31 columnas (B ≤ 30).
+3. **Comprobación por fuerza bruta:** cada combinación revisada, independiente de la DP. Solo con hasta 20 etapas.
+4. **Veredicto:** `COINCIDE` si la DP eligió una solución óptima, `NO COINCIDE` si no, o `SIN COMPROBAR` si el caso es demasiado grande.
+
+La comprobación también se guarda en `resultados/auditoria/<id>.log`. Con una carpeta, el detalle solo aparece si se agrega `--detalle`:
+
+```bash
+python src/main.py pruebas/casos --detalle
+```
+
 Por defecto las salidas van a `resultados/`. Se puede indicar otra carpeta como segundo argumento:
 
 ```bash
 python src/main.py pruebas/casos otra_carpeta
+```
+
+Auditar un caso por fuerza bruta: prueba todas las combinaciones de etapas, deja un registro de cada una y compara el óptimo con el de la DP. El registro se guarda en `resultados/auditoria/<id>.log`. Solo audita casos de hasta 20 etapas:
+
+```bash
+python src/auditar.py pruebas/casos/ejemplo_tres_etapas.json
 ```
 
 Generar un caso aleatorio reproducible con `n` etapas y una semilla:
@@ -140,13 +159,15 @@ Por cada caso se crea `resultados/<id>.json`, y además `resultados/resumen.json
 python -m unittest discover -s pruebas
 ```
 
-Las 14 pruebas cubren:
+Las 19 pruebas cubren:
 
 - Los ejemplos con respuesta conocida.
 - Los casos borde: presupuesto 0, sin etapas, costo mayor que el presupuesto y costo 0.
 - Los 10 casos propios de `pruebas/casos`, comparados con su respuesta esperada, que se calculó por fuerza bruta.
 - La validación de casos inválidos, incluido un JSON mal escrito.
 - 300 casos aleatorios con semilla fija, comparados contra fuerza bruta.
+- El auditor por fuerza bruta: coincide con la DP en los casos propios y registra cada combinación.
+- La vista de la tabla en la terminal: marca el camino de la reconstrucción y no dibuja tablas demasiado anchas.
 
 La lista de casos propios y qué prueba cada uno está en el [manual técnico](docs/MANUAL_TECNICO.md#8-casos-de-prueba-propios).
 
@@ -157,12 +178,14 @@ La lista de casos propios y qué prueba cada uno está en el [manual técnico](d
 │   ├── lectura.py       lee y valida los casos
 │   ├── aceleracion.py   tabla DP, reconstrucción y traza
 │   ├── main.py          corre los casos, mide el tiempo y guarda las salidas
+│   ├── tabla.py         dibuja en la terminal la tabla DP y la reconstrucción
+│   ├── auditar.py       audita por fuerza bruta y compara con la DP
 │   └── generar_casos.py crea casos aleatorios reproducibles
 ├── pruebas/
 │   ├── test_aceleracion.py
 │   └── casos/           casos propios con respuesta conocida
 ├── casos/               caso base que entregue el monitor
-├── resultados/          salidas del programa
+├── resultados/          salidas del programa; auditoria/ guarda los registros de fuerza bruta
 ├── docs/
 │   └── MANUAL_TECNICO.md
 └── informe/

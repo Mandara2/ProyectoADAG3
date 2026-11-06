@@ -28,9 +28,11 @@ Todos los comandos de este manual se ejecutan desde la raíz del repositorio.
 
 | Qué se quiere | Comando |
 | --- | --- |
-| Correr un solo caso | `python src/main.py ruta/al/caso.json` |
+| Correr un solo caso, con su detalle completo | `python src/main.py ruta/al/caso.json` |
 | Correr todos los casos de una carpeta | `python src/main.py pruebas/casos` |
+| Lo mismo, con el detalle completo de cada caso | `python src/main.py pruebas/casos --detalle` |
 | Elegir dónde guardar las salidas | `python src/main.py pruebas/casos otra_carpeta` |
+| Auditar un caso o una carpeta por fuerza bruta | `python src/auditar.py pruebas/casos` |
 | Correr las pruebas automáticas | `python -m unittest discover -s pruebas` |
 | Generar un caso aleatorio | `python src/generar_casos.py <n> <semilla> [carpeta]` |
 
@@ -39,6 +41,17 @@ Por defecto las salidas se guardan en `resultados/`. Por cada caso, el programa 
 ```text
 ejemplo_tres_etapas: acelerar [1, 3], costo 9/10, duración 22 -> 15, 0.007 ms
 ```
+
+Con un solo archivo, o con `--detalle`, después de esa línea se imprime el detalle del caso en cuatro bloques separados:
+
+| Bloque | Qué muestra |
+| --- | --- |
+| `[1] DATOS DEL CASO` | `n`, `B`, la duración sin acelerar y `t`, `c`, `d` de cada etapa |
+| `[2] PROGRAMACIÓN DINÁMICA` | La tabla DP con el camino de la reconstrucción entre corchetes, la reconstrucción paso a paso y el resultado (sección 6.4) |
+| `[3] COMPROBACIÓN POR FUERZA BRUTA` | Cada combinación revisada, sin usar la DP, y las soluciones óptimas (sección 6.5) |
+| `[4] VEREDICTO` | `COINCIDE`, `NO COINCIDE` o `SIN COMPROBAR` (si el caso tiene más de 20 etapas) |
+
+Los bloques 3 y 4 también se guardan en `resultados/auditoria/<id>.log`, y el resumen incluye el campo `coincide_con_fuerza_bruta`.
 
 Si un caso es inválido, el programa lo reporta y sigue con los demás:
 
@@ -119,6 +132,8 @@ src/
 ├── lectura.py        lee y valida los casos
 ├── aceleracion.py    algoritmo: tabla, reconstrucción y traza
 ├── main.py           corre los casos, mide el tiempo y escribe las salidas
+├── tabla.py          dibuja en la terminal la tabla DP y la reconstrucción
+├── auditar.py        audita por fuerza bruta y compara con la DP
 └── generar_casos.py  crea casos aleatorios reproducibles
 pruebas/
 ├── test_aceleracion.py
@@ -148,9 +163,50 @@ Es el único archivo que conoce el formato de entrada. Si los casos llegan en ot
 1. Recibe un archivo o una carpeta.
 2. Para cada caso: lo lee con `leer_caso`, ejecuta `resolver` 5 veces midiendo con `time.perf_counter()` y promedia el tiempo.
 3. Escribe `resultados/<id>.json` e imprime la línea resumen.
-4. Al final escribe `resultados/resumen.json`.
+4. Si es un solo archivo o se pidió `--detalle`, imprime los cuatro bloques con `tabla.py` y las funciones de `auditar.py`, y guarda el registro de la comprobación.
+5. Al final escribe `resultados/resumen.json`.
 
-### 6.4 `generar_casos.py`
+### 6.4 `tabla.py`
+
+Dibuja en la terminal lo que hizo la DP con un caso: es el bloque 2 del detalle.
+
+- **La tabla DP**, con una fila por etapa (etiquetada con su `c` y su `d`) y una columna por presupuesto `b`. Las casillas por las que pasa la reconstrucción van entre corchetes. Solo se dibuja si tiene hasta 31 columnas (`B <= 30`) y menos de 500 casillas; si no, se avisa y se omite.
+- **La reconstrucción**, de la última etapa a la primera, con la decisión de cada paso.
+- **El resultado** en una línea.
+
+```text
+Etapas \ b   |  0   1   2   3   4   5   6   7   8   9  10
+---------------------------------------------------------
+0 ninguna    |  0  [0]  0   0   0   0   0   0   0   0   0
+1 (c=4, d=3) |  0   0   0   0   3  [3]  3   3   3   3   3
+2 (c=3, d=2) |  0   0   0   2   3  [3]  3   5   5   5   5
+3 (c=5, d=4) |  0   0   0   2   3   4   4   5   6   7  [7]
+```
+
+### 6.5 `auditar.py`
+
+Comprueba la DP de forma independiente. Sus funciones `comprobar` y `veredicto` producen los bloques 3 y 4 del detalle de `main.py`, y también se puede correr solo con `python src/auditar.py`. Para cada caso de hasta 20 etapas prueba los `2^n` subconjuntos en orden de tamaño. De cada uno registra:
+
+- Qué etapas se aceleran y cuánto cuesta.
+- Si cabe en el presupuesto. Si no cabe, lo anota y no lo evalúa.
+- La reducción y la duración resultantes.
+- Si es un nuevo mejor o empata con el mejor.
+
+Al final lista todas las soluciones óptimas, corre la DP y escribe `COINCIDE` si la DP eligió una de ellas, o `NO COINCIDE` si no. El registro se imprime y se guarda en `resultados/auditoria/<id>.log`. Con más de 1.024 combinaciones (más de 10 etapas) solo se escriben las que mejoran el resultado, para que el archivo no sea enorme. Termina con código 1 si algún caso no coincide.
+
+Fragmento del registro de `ejemplo_tres_etapas`:
+
+```text
+    #  Etapas aceleradas       Costo  Cabe Reducción Duración  Nota
+    6  {1, 3}                      9  sí           7       15  nuevo mejor
+    7  {2, 3}                      8  sí           6       16
+    8  {1, 2, 3}                  12  no           -        -  no cabe: 12 > 10
+
+Programación dinámica: acelera {1, 3}, reducción 7, costo 9.
+Resultado: COINCIDE. La DP encontró una de las soluciones óptimas.
+```
+
+### 6.6 `generar_casos.py`
 
 Crea un caso aleatorio a partir de `n` y una semilla. La misma semilla siempre produce el mismo caso. Cada etapa tiene `t` entre 1 y 20, `d` entre 0 y `t` y `c` entre 1 y 15. El presupuesto es la mitad de la suma de los costos, para que no todas las etapas quepan.
 
@@ -195,13 +251,14 @@ Están en `pruebas/casos/`. La respuesta esperada se calculó por fuerza bruta, 
 
 ## 9. Pruebas automáticas
 
-`python -m unittest discover -s pruebas` corre 14 pruebas:
+`python -m unittest discover -s pruebas` corre 19 pruebas:
 
 - Los ejemplos con resultado y traza conocidos.
 - Los casos borde.
 - Todos los casos de `pruebas/casos`, comparados con su campo `esperado`.
 - 300 casos aleatorios con semilla fija, comparados contra fuerza bruta.
 - La validación: `d > t`, presupuesto no entero, `etapas` que no es lista y JSON mal escrito.
+- El auditor: coincide con la DP en los casos propios, registra las 8 combinaciones del ejemplo y no intenta auditar casos de más de 20 etapas.
 
 ## 10. Limitaciones
 

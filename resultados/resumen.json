@@ -20,7 +20,8 @@
     ],
     "costo_usado": 29,
     "duracion_final": 69,
-    "tiempo_ms": 0.04100000001017179
+    "tiempo_ms": 0.04501999937929213,
+    "coincide_con_fuerza_bruta": true
   },
   {
     "archivo": "aleatorio_n200_s1.json",
@@ -145,7 +146,8 @@
     ],
     "costo_usado": 824,
     "duracion_final": 1188,
-    "tiempo_ms": 13.204300000006697
+    "tiempo_ms": 12.762800001655705,
+    "coincide_con_fuerza_bruta": null
   },
   {
     "archivo": "borde_costo_cero.json",
@@ -158,7 +160,8 @@
     ],
     "costo_usado": 0,
     "duracion_final": 7,
-    "tiempo_ms": 0.003239999978177366
+    "tiempo_ms": 0.003479997394606471,
+    "coincide_con_fuerza_bruta": true
   },
   {
     "archivo": "borde_nada_cabe.json",
@@ -169,7 +172,8 @@
     "etapas_aceleradas": [],
     "costo_usado": 0,
     "duracion_final": 9,
-    "tiempo_ms": 0.003119999973932863
+    "tiempo_ms": 0.0030399998649954796,
+    "coincide_con_fuerza_bruta": true
   },
   {
     "archivo": "borde_presupuesto_cero.json",
@@ -180,7 +184,8 @@
     "etapas_aceleradas": [],
     "costo_usado": 0,
     "duracion_final": 9,
-    "tiempo_ms": 0.002480000011928496
+    "tiempo_ms": 0.002680000034160912,
+    "coincide_con_fuerza_bruta": true
   },
   {
     "archivo": "borde_sin_reduccion.json",
@@ -193,7 +198,8 @@
     ],
     "costo_usado": 2,
     "duracion_final": 5,
-    "tiempo_ms": 0.0033400000120309414
+    "tiempo_ms": 0.003500000457279384,
+    "coincide_con_fuerza_bruta": true
   },
   {
     "archivo": "borde_todo_cabe.json",
@@ -208,7 +214,8 @@
     ],
     "costo_usado": 6,
     "duracion_final": 5,
-    "tiempo_ms": 0.024880000000848668
+    "tiempo_ms": 0.024480000138282776,
+    "coincide_con_fuerza_bruta": true
   },
   {
     "archivo": "ejemplo_almuerzo.json",
@@ -222,7 +229,8 @@
     ],
     "costo_usado": 5,
     "duracion_final": 6,
-    "tiempo_ms": 0.00390000000152213
+    "tiempo_ms": 0.004260000423528254,
+    "coincide_con_fuerza_bruta": true
   },
   {
     "archivo": "ejemplo_tres_etapas.json",
@@ -236,7 +244,8 @@
     ],
     "costo_usado": 9,
     "duracion_final": 15,
-    "tiempo_ms": 0.00683999996908824
+    "tiempo_ms": 0.005060000694356859,
+    "coincide_con_fuerza_bruta": true
   },
   {
     "archivo": "voraz_por_razon_falla.json",
@@ -250,6 +259,7 @@
     ],
     "costo_usado": 50,
     "duracion_final": 60,
-    "tiempo_ms": 0.011399999993955134
+    "tiempo_ms": 0.011079999967478216,
+    "coincide_con_fuerza_bruta": true
   }
 ]

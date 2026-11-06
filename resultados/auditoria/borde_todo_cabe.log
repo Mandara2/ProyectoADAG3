@@ -1,0 +1,23 @@
+=== Comprobación por fuerza bruta: borde_todo_cabe ===
+n = 3 etapas, presupuesto B = 100, duración sin acelerar = 16
+  etapa 1: t = 5, c = 2, d = 3
+  etapa 2: t = 4, c = 1, d = 1
+  etapa 3: t = 7, c = 3, d = 7
+
+Se revisan 2^3 = 8 combinaciones.
+
+    #  Etapas aceleradas       Costo  Cabe Reducción Duración  Nota
+    1  {}                          0  sí           0       16  nuevo mejor
+    2  {1}                         2  sí           3       13  nuevo mejor
+    3  {2}                         1  sí           1       15  
+    4  {3}                         3  sí           7        9  nuevo mejor
+    5  {1, 2}                      3  sí           4       12  
+    6  {1, 3}                      5  sí          10        6  nuevo mejor
+    7  {2, 3}                      4  sí           8        8  
+    8  {1, 2, 3}                   6  sí          11        5  nuevo mejor
+
+Fuerza bruta: reducción máxima 11, duración 16 -> 5.
+Soluciones óptimas (1): {1, 2, 3}
+
+Programación dinámica: acelera {1, 2, 3}, reducción 11, costo 6.
+Resultado: COINCIDE. La DP encontró una de las soluciones óptimas.

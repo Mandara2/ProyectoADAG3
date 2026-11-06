@@ -1,0 +1,18 @@
+=== Comprobación por fuerza bruta: borde_costo_cero ===
+n = 2 etapas, presupuesto B = 0, duración sin acelerar = 9
+  etapa 1: t = 5, c = 0, d = 2
+  etapa 2: t = 4, c = 1, d = 4
+
+Se revisan 2^2 = 4 combinaciones.
+
+    #  Etapas aceleradas       Costo  Cabe Reducción Duración  Nota
+    1  {}                          0  sí           0        9  nuevo mejor
+    2  {1}                         0  sí           2        7  nuevo mejor
+    3  {2}                         1  no           -        -  no cabe: 1 > 0
+    4  {1, 2}                      1  no           -        -  no cabe: 1 > 0
+
+Fuerza bruta: reducción máxima 2, duración 9 -> 7.
+Soluciones óptimas (1): {1}
+
+Programación dinámica: acelera {1}, reducción 2, costo 0.
+Resultado: COINCIDE. La DP encontró una de las soluciones óptimas.

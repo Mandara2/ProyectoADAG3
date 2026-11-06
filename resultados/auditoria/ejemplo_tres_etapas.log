@@ -1,0 +1,23 @@
+=== Comprobación por fuerza bruta: ejemplo_tres_etapas ===
+n = 3 etapas, presupuesto B = 10, duración sin acelerar = 22
+  etapa 1: t = 8, c = 4, d = 3
+  etapa 2: t = 5, c = 3, d = 2
+  etapa 3: t = 9, c = 5, d = 4
+
+Se revisan 2^3 = 8 combinaciones.
+
+    #  Etapas aceleradas       Costo  Cabe Reducción Duración  Nota
+    1  {}                          0  sí           0       22  nuevo mejor
+    2  {1}                         4  sí           3       19  nuevo mejor
+    3  {2}                         3  sí           2       20  
+    4  {3}                         5  sí           4       18  nuevo mejor
+    5  {1, 2}                      7  sí           5       17  nuevo mejor
+    6  {1, 3}                      9  sí           7       15  nuevo mejor
+    7  {2, 3}                      8  sí           6       16  
+    8  {1, 2, 3}                  12  no           -        -  no cabe: 12 > 10
+
+Fuerza bruta: reducción máxima 7, duración 22 -> 15.
+Soluciones óptimas (1): {1, 3}
+
+Programación dinámica: acelera {1, 3}, reducción 7, costo 9.
+Resultado: COINCIDE. La DP encontró una de las soluciones óptimas.
