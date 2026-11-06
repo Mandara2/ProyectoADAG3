@@ -448,7 +448,27 @@ La reconstrucción no necesita guardar las decisiones en otra tabla. Como la com
   \end{cases}
   \qquad \DP{0}{b}=0.
 \end{equation}
-El algoritmo \textsc{Aceleración-DP}$(t,c,d,B,n)$ es el \textsc{Mochila-DP} con $(w,v,W)$ reemplazados por $(c,d,B)$, y que devuelve la duración mínima $\sum_i t_i-\DP{n}{B}$ junto con el conjunto $A^*$ de etapas aceleradas.
+El algoritmo \textsc{Aceleración-DP} es el \textsc{Mochila-DP} con $(w,v,W)$ reemplazados por $(c,d,B)$, más un último paso que convierte la reducción máxima en la duración mínima de la cadena. Es el que está implementado en \texttt{src/aceleracion.py}.
+
+\begin{algorithm}[h]
+\caption{\textsc{Aceleración-DP}$(t,c,d,B,n)$}
+\begin{algorithmic}[1]
+\For{$b\gets 0$ \textbf{hasta} $B$} \State $\DP{0}{b}\gets 0$ \EndFor
+\For{$i\gets 1$ \textbf{hasta} $n$}
+  \For{$b\gets 0$ \textbf{hasta} $B$}
+    \State $\DP{i}{b}\gets\DP{i-1}{b}$
+    \If{$c_i\le b$ \textbf{y} $\DP{i-1}{b-c_i}+d_i>\DP{i-1}{b}$}
+      \State $\DP{i}{b}\gets\DP{i-1}{b-c_i}+d_i$
+    \EndIf
+  \EndFor
+\EndFor
+\State $b\gets B$;\quad $A^*\gets\emptyset$
+\For{$i\gets n$ \textbf{hasta} $1$ \textbf{descendiendo}}
+  \If{$\DP{i}{b}\ne\DP{i-1}{b}$} \State $A^*\gets A^*\cup\{i\}$;\quad $b\gets b-c_i$ \EndIf
+\EndFor
+\State \Return $\bigl(\sum_i t_i-\DP{n}{B},\;A^*\bigr)$
+\end{algorithmic}
+\end{algorithm}
 
 \textbf{Cómo leer la recurrencia.} La etapa $i$ solo tiene dos opciones:
 \begin{itemize}
@@ -456,6 +476,8 @@ El algoritmo \textsc{Aceleración-DP}$(t,c,d,B,n)$ es el \textsc{Mochila-DP} con
   \item \textit{Acelerarla:} se gana $d_i$ y a las etapas anteriores les queda un presupuesto de $b-c_i$.
 \end{itemize}
 Si la etapa no cabe en el presupuesto ($c_i>b$), solo queda la primera opción. La tabla toma el mejor de los dos casos, y $\DP{n}{B}$ es la reducción óptima.
+
+\textbf{Principio de optimalidad.} La recurrencia funciona gracias al principio de optimalidad de Bellman (1957): una solución óptima de un problema está formada por soluciones óptimas de sus subproblemas. Aquí significa que, si una elección óptima con las primeras $i$ etapas y presupuesto $b$ acelera la etapa $i$, lo que eligió entre las $i-1$ etapas anteriores es a su vez óptimo para el presupuesto $b-c_i$; y si no la acelera, es óptimo para el presupuesto $b$. Si esa parte no fuera óptima, se podría cambiar por una mejor y se obtendría algo mejor que el óptimo, lo cual es imposible. Por eso basta con guardar en la fila $i-1$ el mejor valor de cada subproblema y combinar esos valores, sin revisar todas las combinaciones. En el ejemplo, $\DP{3}{10}=7$ se obtiene de $\DP{2}{5}=3$, que es el mejor ahorro posible con las etapas 1 y 2 y presupuesto 5.
 
 \subsection{Ejemplo: las dos tablas}
 
@@ -619,6 +641,7 @@ Cómo se lee: en la etapa 3, $\DP{3}{10}=7$ es distinto de $\DP{2}{10}=5$, así 
 \section*{Referencias}
 \addcontentsline{toc}{section}{Referencias}
 \begin{enumerate}[label={[\arabic*]},leftmargin=2em,itemsep=4pt]
+  \item Bellman, R. (1957). \textit{Dynamic Programming}. Princeton University Press.
   \item Cook, S. A. (1971). The complexity of theorem-proving procedures. En \textit{Proceedings of the Third Annual ACM Symposium on Theory of Computing} (pp. 151--158).
   \item Karp, R. M. (1972). Reducibility among combinatorial problems. En \textit{Complexity of Computer Computations} (pp. 85--103). Plenum Press.
   \item \textit{Proyecto Semestral, Análisis y Diseño de Algoritmos, 2026-B}. Universidad de Caldas.
